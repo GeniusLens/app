@@ -1,8 +1,11 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
+import 'package:genius_lens/api/favorite.dart';
 import 'package:genius_lens/constants.dart';
+import 'package:genius_lens/data/entity/favorite.dart';
 import 'package:genius_lens/pages/favorite/favorite_card.dart';
 import 'package:genius_lens/utils/debug_util.dart';
+import 'package:get/get.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -12,55 +15,44 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  final List<Demo> _demoList = [
-    Demo(
-      'https://s2.loli.net/2024/01/02/DKAhyMoIirFN14g.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/vJMrj8DL2ftansF.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/5SZmQk26KGylxNi.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/mqbNn2lt7zhiLRH.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/c7eAvwdqZCfFoi5.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/vms62xKGAz9yJoP.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/C69DKHPB5AiJjQW.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-    Demo(
-      'https://s2.loli.net/2024/01/02/VuBrWOn3NLSyY1s.png',
-      '收藏内容',
-      '收藏内容（预设/风格）介绍',
-    ),
-  ];
+  final List<FavoriteEntity> _list = [];
+  bool _hasError = false;
+  bool _isLoading = false;
+
+  Future<void> _loadData() async {
+    setState(() {
+      _hasError = false;
+      _isLoading = true;
+      _list.clear();
+    });
+    try {
+      var list = await FavoriteApi().getFavoriteList();
+      setState(() {
+        _list.addAll(list);
+        _hasError = false;
+      });
+    } catch (e) {
+      Get.snackbar('加载失败', e.toString());
+      setState(() => _hasError = true);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void initState() {
+    _loadData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Constants.globalPadding),
+      body: Padding(
+        padding:
+            const EdgeInsets.symmetric(horizontal: Constants.globalPadding),
+        child: RefreshIndicator(
+          onRefresh: _loadData,
           child: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -76,10 +68,8 @@ class _FavoritePageState extends State<FavoritePage> {
                   preferredSize: const Size.fromHeight(48),
                   child: TextField(
                     decoration: InputDecoration(
-                      // Use no border outline to avoid the extra padding
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        // Use transparent color to avoid the extra padding
                         borderSide: const BorderSide(color: Colors.transparent),
                       ),
                       isDense: true,
@@ -94,16 +84,44 @@ class _FavoritePageState extends State<FavoritePage> {
               const SliverToBoxAdapter(
                 child: SizedBox(height: 8),
               ),
-              SliverGrid.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+              if (_hasError)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Column(
+                      children: [
+                        IconButton(
+                          onPressed: _loadData,
+                          icon: const Icon(Icons.refresh, size: 36),
+                        ),
+                        const Text('加载失败, 请重试', style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  return FavoriteCard(_demoList[index]);
-                },
-                itemCount: _demoList.length,
+              if (_isLoading)
+                const SliverToBoxAdapter(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              if (_list.isNotEmpty && !_isLoading && !_hasError)
+                SliverGrid.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemBuilder: (context, index) {
+                    return FavoriteCard(
+                      _list[index],
+                    );
+                  },
+                  itemCount: _list.length,
+                ),
+              // 占位符
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 12),
               ),
             ],
           ),

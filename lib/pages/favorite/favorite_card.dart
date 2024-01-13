@@ -1,27 +1,15 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/constants.dart';
+import 'package:genius_lens/data/entity/favorite.dart';
 import 'package:genius_lens/utils/debug_util.dart';
 import 'package:get/get.dart';
 
-class Demo {
-  String url;
-  String title;
-  String subtitle;
-
-  Demo(this.url, this.title, this.subtitle);
-}
-
-class FavoriteCard extends StatefulWidget {
+class FavoriteCard extends StatelessWidget {
   const FavoriteCard(this.content, {super.key});
 
-  final Demo content;
+  final FavoriteEntity content;
 
-  @override
-  State<FavoriteCard> createState() => _FavoriteCardState();
-}
-
-class _FavoriteCardState extends State<FavoriteCard> {
   final TextStyle _titleStyle = const TextStyle(
     fontSize: Constants.bodySize,
     color: Colors.white,
@@ -45,7 +33,7 @@ class _FavoriteCardState extends State<FavoriteCard> {
           borderRadius: BorderRadius.circular(Constants.basicCardBorderRadius),
           image: DecorationImage(
             image: ExtendedImage.network(
-              widget.content.url,
+              content.coverUrl,
               fit: BoxFit.cover,
               cache: true,
               key: Key(DebugUtil.getRandomImageURL()),
@@ -78,11 +66,11 @@ class _FavoriteCardState extends State<FavoriteCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.content.title,
+                content.title,
                 style: _titleStyle,
               ),
               Text(
-                widget.content.subtitle,
+                content.description ?? '',
                 style: _subtitleStyle,
               ),
               const Spacer(),

@@ -2,15 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:genius_lens/constants.dart';
+import 'package:genius_lens/data/entity/profile.dart';
 
-class ProfilePanel extends StatefulWidget {
-  const ProfilePanel({super.key});
+class ProfilePanel extends StatelessWidget {
+  const ProfilePanel(this.profile, {super.key});
 
-  @override
-  State<ProfilePanel> createState() => _ProfilePanelState();
-}
+  final ProfileEntity profile;
 
-class _ProfilePanelState extends State<ProfilePanel> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -19,9 +17,9 @@ class _ProfilePanelState extends State<ProfilePanel> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          PanelItem(title: '动态', value: Random().nextInt(100).toString()),
-          PanelItem(title: '粉丝', value: Random().nextInt(100).toString()),
-          PanelItem(title: '关注', value: Random().nextInt(100).toString()),
+          PanelItem(title: '动态', value: profile.postCount.toString()),
+          PanelItem(title: '粉丝', value: profile.fansCount.toString()),
+          PanelItem(title: '关注', value: profile.followCount.toString()),
         ],
       ),
     );

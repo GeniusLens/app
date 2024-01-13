@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
-import 'package:genius_lens/pages/create/create_page.dart';
+import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/favorite/favorite_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class IndexPage extends StatefulWidget {
+  const IndexPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<IndexPage> createState() => _IndexPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _IndexPageState extends State<IndexPage> {
   /// The width of the center space in the [BottomAppBar].
   static const double _centerWidth = 24;
 
@@ -22,7 +22,7 @@ class _MainPageState extends State<MainPage> {
 
   /// The list of pages to show in the [BottomNavigationBar].
   final List<Widget> _pages = <Widget>[
-    const CreatePage(),
+    const ModelManagePage(),
     const FavoritePage(),
     const CommunityPage(),
     const ProfilePage(),
@@ -43,7 +43,8 @@ class _MainPageState extends State<MainPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
+        notchMargin: 6,
+        height: 64,
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -70,8 +71,8 @@ class _MainPageState extends State<MainPage> {
                 setState(() => _selectedIndex = 2);
               },
               icon: (_selectedIndex == 2)
-                  ? const Icon(Icons.people)
-                  : const Icon(Icons.people_alt_outlined),
+                  ? const Icon(Icons.explore)
+                  : const Icon(Icons.explore_outlined),
             ),
             IconButton(
               onPressed: () {
@@ -85,15 +86,5 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

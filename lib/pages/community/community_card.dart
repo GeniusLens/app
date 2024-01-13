@@ -3,20 +3,15 @@ import 'dart:math';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/constants.dart';
+import 'package:genius_lens/data/entity/community.dart';
 import 'package:genius_lens/utils/debug_util.dart';
 
-import 'community_page.dart';
+class CommunityCard extends StatelessWidget {
+  const CommunityCard(this.content, this.onTap, {super.key});
 
-class CommunityCard extends StatefulWidget {
-  const CommunityCard(this.content, {super.key});
+  final CommunityRecommendEntity content;
+  final VoidCallback onTap;
 
-  final EEE content;
-
-  @override
-  State<CommunityCard> createState() => _CommunityCardState();
-}
-
-class _CommunityCardState extends State<CommunityCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -35,9 +30,8 @@ class _CommunityCardState extends State<CommunityCard> {
               ),
               child: Image(
                 width: double.infinity,
-                // height: widget.height,
                 image: ExtendedImage.network(
-                  widget.content.url,
+                  content.coverUrl,
                   fit: BoxFit.cover,
                 ).image,
                 fit: BoxFit.cover,
@@ -45,19 +39,18 @@ class _CommunityCardState extends State<CommunityCard> {
             ),
           ),
           const SizedBox(height: 8),
-          if (widget.content.title != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                widget.content.title!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: Constants.captionSize,
-                  color: Colors.grey[800],
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              content.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: Constants.captionSize,
+                color: Colors.grey[800],
               ),
             ),
+          ),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -68,13 +61,13 @@ class _CommunityCardState extends State<CommunityCard> {
                 CircleAvatar(
                   radius: 12,
                   backgroundImage: ExtendedImage.network(
-                    DebugUtil.getRandomImageURL(),
+                    content.userAvatarUrl,
                     fit: BoxFit.cover,
                   ).image,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${Random().nextInt(100)}' * (Random().nextInt(3) + 1),
+                  content.userName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -83,13 +76,30 @@ class _CommunityCardState extends State<CommunityCard> {
                   ),
                 ),
                 const Spacer(),
-                const Icon(Icons.favorite_border, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  '${Random().nextInt(100)}',
-                  style: TextStyle(
-                    fontSize: Constants.captionSize - 2,
-                    color: Colors.grey[700],
+                GestureDetector(
+                  onTap: onTap,
+                  child: Row(
+                    children: [
+                      content.isLike
+                          ? const Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                              size: 16,
+                            )
+                          : Icon(
+                              Icons.favorite_border,
+                              color: Colors.grey[700],
+                              size: 16,
+                            ),
+                      const SizedBox(width: 4),
+                      Text(
+                        content.likeCount.toString(),
+                        style: TextStyle(
+                          fontSize: Constants.captionSize - 2,
+                          color: Colors.grey[700],
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ],

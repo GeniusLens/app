@@ -1,10 +1,13 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
 import 'package:genius_lens/pages/community/detail_page.dart';
+import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/detail/detail_page.dart';
 import 'package:genius_lens/pages/favorite/favorite_page.dart';
 import 'package:genius_lens/pages/function/function_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
+import 'package:get/get.dart';
 
 class AppRouter {
   /// Static route names
@@ -13,7 +16,7 @@ class AppRouter {
   static const String register = '/register';
 
   static const String mainPage = '/main';
-  static const String createPage = '/create';
+  static const String modelManagePage = '/manage';
   static const String favoritePage = '/favorite';
   static const String communityPage = '/community';
   static const String communityDetailPage = '/community/detail';
@@ -27,7 +30,7 @@ class AppRouter {
     login: (context) => const Text('Login'),
     register: (context) => const Text('Register'),
     mainPage: (context) => const Text('Main'),
-    createPage: (context) => const Text('Create'),
+    modelManagePage: (context) => const ModelManagePage(),
     favoritePage: (context) => const FavoritePage(),
     communityPage: (context) => const CommunityPage(),
     communityDetailPage: (context) => const CommunityDetailPage(),
@@ -40,11 +43,41 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     if (routes.containsKey(settings.name)) {
       return MaterialPageRoute(
-        builder: routes[settings.name]!,
-      );
+          builder: (context) => routes[settings.name]!(context));
     }
     return MaterialPageRoute(
-      builder: (context) => const Text('Not Found'),
+      builder: (context) => const NotFoundPage(),
+    );
+  }
+}
+
+class NotFoundPage extends StatelessWidget {
+  const NotFoundPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('页面不存在'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image(
+              width: 256,
+              height: 256,
+              image: ExtendedImage.asset(
+                'assets/gifs/404.gif',
+                fit: BoxFit.fill,
+              ).image,
+            ),
+            const SizedBox(height: 24),
+            const Text('页面不见了，快去找找吧~', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
     );
   }
 }

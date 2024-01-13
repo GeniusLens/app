@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:genius_lens/pages/main.dart';
+import 'package:genius_lens/pages/index.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
@@ -21,18 +21,27 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  ThemeData lightTheme() {
+    var base = ThemeData.light();
+
+    return base;
+  }
+
+  ThemeData darkTheme() {
+    var base = ThemeData.dark();
+
+    return base;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Genius Lens',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF31D7A)),
-        useMaterial3: true,
-      ),
+      title: '创艺相机',
+      theme: lightTheme(),
+      darkTheme: darkTheme(),
       onGenerateRoute: AppRouter.onGenerateRoute,
-      home: const MainPage(),
       debugShowCheckedModeBanner: false,
+      home: const IndexPage(),
     );
   }
 }

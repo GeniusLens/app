@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:genius_lens/api/profile.dart';
 import 'package:genius_lens/constants.dart';
+import 'package:genius_lens/data/entity/profile.dart';
 import 'package:genius_lens/pages/profile/profile_header.dart';
 import 'package:genius_lens/pages/profile/profile_history.dart';
 import 'package:genius_lens/pages/profile/profile_panel.dart';
@@ -13,6 +15,23 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  ProfileEntity? profile;
+
+  Future<void> _loadData() async {
+    try {
+      var profile = await ProfileApi().getProfile();
+      setState(() => this.profile = profile);
+    } catch (e) {
+      Get.snackbar('加载失败', e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    _loadData();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,9 +48,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-            const SliverToBoxAdapter(child: ProfileHeader()),
+            if (profile != null)
+              SliverToBoxAdapter(child: ProfileHeader(profile!)),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            const SliverToBoxAdapter(child: ProfilePanel()),
+            if (profile != null)
+              SliverToBoxAdapter(child: ProfilePanel(profile!)),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             const SliverToBoxAdapter(
               child: Padding(
