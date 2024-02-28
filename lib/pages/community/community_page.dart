@@ -131,6 +131,8 @@ class _CommunityPageState extends State<CommunityPage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.theme.scaffoldBackgroundColor,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,

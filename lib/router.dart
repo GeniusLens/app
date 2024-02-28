@@ -5,6 +5,7 @@ import 'package:genius_lens/pages/community/detail_page.dart';
 import 'package:genius_lens/pages/entrance/model_create_page.dart';
 import 'package:genius_lens/pages/generate/generate_result_page.dart';
 import 'package:genius_lens/pages/generate/model_select_page.dart';
+import 'package:genius_lens/pages/generate/multi_generate_page.dart';
 import 'package:genius_lens/pages/generate/solo_generate_page.dart';
 import 'package:genius_lens/pages/message/message_page.dart';
 import 'package:genius_lens/pages/profile/follower_list_page.dart';
@@ -28,6 +29,7 @@ class AppRouter {
   static const String selectModelPage = '/model/select';
 
   static const String soloGeneratePage = '/generate/solo';
+  static const String multiGeneratePage = '/generate/multi';
   static const String generateResultPage = '/generate/result';
 
   static const String favoritePage = '/favorite';
@@ -52,6 +54,7 @@ class AppRouter {
     selectModelPage : (context) => const ModelSelectPage(),
 
     soloGeneratePage: (context) => const SoloGeneratePage(),
+    multiGeneratePage: (context) => const MultiGeneratePage(),
     generateResultPage: (context) => const GenerateResultPage(),
 
     favoritePage: (context) => const FavoritePage(),
