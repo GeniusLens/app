@@ -130,7 +130,7 @@ class _CommunityPageState extends State<CommunityPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,

@@ -22,7 +22,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   ThemeData lightTheme() {
-    var base = ThemeData.light();
+    var base = ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF836D)));
+
+    base = base.copyWith(
+      primaryColor: const Color(0xFFFF836D),
+      scaffoldBackgroundColor: const Color(0xfff6f6f6),
+      cardColor: Colors.white,
+    );
 
     return base;
   }

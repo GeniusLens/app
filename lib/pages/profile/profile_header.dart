@@ -9,6 +9,7 @@ class ProfileHeader extends StatelessWidget {
 
   final TextStyle _nameStyle = const TextStyle(
     fontSize: 22,
+    fontWeight: FontWeight.w600,
   );
 
   final TextStyle _signatureStyle = const TextStyle(
@@ -17,9 +18,11 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
+    return Container(
+      padding: const EdgeInsets.all(16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
             radius: 48,
@@ -32,6 +35,8 @@ class ProfileHeader extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   profile.nickname,
@@ -49,6 +54,11 @@ class ProfileHeader extends StatelessWidget {
               ],
             ),
           ),
+          Container(
+            child: GestureDetector(
+              child: Icon(Icons.chevron_right, size: 32),
+            ),
+          )
         ],
       ),
     );

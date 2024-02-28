@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
+import 'package:genius_lens/pages/entrance/entrance_page.dart';
+import 'package:genius_lens/pages/generate/generate_page.dart';
 import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/favorite/favorite_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
@@ -22,8 +24,8 @@ class _IndexPageState extends State<IndexPage> {
 
   /// The list of pages to show in the [BottomNavigationBar].
   final List<Widget> _pages = <Widget>[
-    const ModelManagePage(),
-    const FavoritePage(),
+    const EntrancePage(),
+    const GeneratePage(),
     const CommunityPage(),
     const ProfilePage(),
   ];
@@ -35,53 +37,92 @@ class _IndexPageState extends State<IndexPage> {
         index: _selectedIndex,
         children: _pages,
       ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        onPressed: () => Get.toNamed(AppRouter.functionPage),
-        child: const Icon(Icons.draw),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6,
-        height: 64,
+        color: Colors.white,
         child: Row(
-          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              onPressed: () {
-                setState(() => _selectedIndex = 0);
-              },
-              icon: (_selectedIndex == 0)
-                  ? const Icon(Icons.home)
-                  : const Icon(Icons.home_outlined),
+          children: <Widget>[
+            _BottomItem(
+              icon: Icons.home_outlined,
+              label: '首页',
+              selected: _selectedIndex == 0,
+              hasNotification: false,
+              onTap: () => setState(() => _selectedIndex = 0),
             ),
-            IconButton(
-              onPressed: () {
-                setState(() => _selectedIndex = 1);
-              },
-              icon: (_selectedIndex == 1)
-                  ? const Icon(Icons.favorite)
-                  : const Icon(Icons.favorite_border),
+            _BottomItem(
+              icon: Icons.draw_outlined,
+              label: 'AI趣',
+              selected: _selectedIndex == 1,
+              hasNotification: (_selectedIndex + 1) % 2 == 0,
+              onTap: () => setState(() => _selectedIndex = 1),
             ),
-            const SizedBox(width: _centerWidth),
-            IconButton(
-              onPressed: () {
-                setState(() => _selectedIndex = 2);
-              },
-              icon: (_selectedIndex == 2)
-                  ? const Icon(Icons.explore)
-                  : const Icon(Icons.explore_outlined),
+            _BottomItem(
+              icon: Icons.explore_outlined,
+              label: '社区',
+              selected: _selectedIndex == 2,
+              hasNotification: false,
+              onTap: () => setState(() => _selectedIndex = 2),
             ),
-            IconButton(
-              onPressed: () {
-                setState(() => _selectedIndex = 3);
-              },
-              icon: (_selectedIndex == 3)
-                  ? const Icon(Icons.person)
-                  : const Icon(Icons.person_outline),
+            _BottomItem(
+              icon: Icons.person_outline,
+              label: '我的',
+              selected: _selectedIndex == 3,
+              hasNotification: false,
+              onTap: () => setState(() => _selectedIndex = 3),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomItem extends StatelessWidget {
+  const _BottomItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.hasNotification,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final bool hasNotification;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Badge(
+        label: const Icon(
+          Icons.circle,
+          size: 6,
+          color: Colors.redAccent,
+        ),
+        isLabelVisible: hasNotification,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              icon,
+              color: selected ? context.theme.primaryColor : Colors.grey,
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? context.theme.primaryColor : Colors.grey,
+              ),
+            ),
+            if (selected)
+              Container(
+                margin: const EdgeInsets.only(top: 2),
+                height: 2,
+                width: 28,
+                color: context.theme.primaryColor,
+              ),
           ],
         ),
       ),
