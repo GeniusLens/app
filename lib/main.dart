@@ -6,23 +6,25 @@ import 'package:genius_lens/pages/index.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
-void main() {
-  runApp(const MyApp());
-
-  if(Platform.isAndroid){
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+  if (Platform.isAndroid) {
     SystemUiOverlayStyle style = const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light
-    );
+        statusBarIconBrightness: Brightness.light);
     SystemChrome.setSystemUIOverlayStyle(style);
   }
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   ThemeData lightTheme() {
-    var base = ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF836D)));
+    var base = ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF836D)));
 
     base = base.copyWith(
       primaryColor: const Color(0xFFFF836D),
