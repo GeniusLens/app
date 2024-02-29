@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:genius_lens/pages/index.dart';
 import 'package:genius_lens/router.dart';
+import 'package:genius_lens/utils/package_util.dart';
 import 'package:get/get.dart';
 
 void main() async {
@@ -17,6 +18,7 @@ void main() async {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
   runApp(const MyApp());
+  await PackageUtil().initialize();
 }
 
 class MyApp extends StatelessWidget {

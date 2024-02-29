@@ -44,17 +44,17 @@ class _ProfilePageState extends State<ProfilePage> {
     _ActionContext(
       icon: Icons.settings,
       title: '设置',
-      route: AppRouter.profilePage,
+      route: AppRouter.settingPage,
     ),
     _ActionContext(
       icon: Icons.help,
       title: '帮助与反馈',
-      route: AppRouter.profilePage,
+      route: AppRouter.helpPage,
     ),
     _ActionContext(
       icon: Icons.info,
       title: '关于我们',
-      route: AppRouter.profilePage,
+      route: AppRouter.aboutPage,
     ),
   ];
 

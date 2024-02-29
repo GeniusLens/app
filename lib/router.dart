@@ -8,8 +8,11 @@ import 'package:genius_lens/pages/generate/model_select_page.dart';
 import 'package:genius_lens/pages/generate/multi_generate_page.dart';
 import 'package:genius_lens/pages/generate/solo_generate_page.dart';
 import 'package:genius_lens/pages/message/message_page.dart';
+import 'package:genius_lens/pages/profile/about_page.dart';
 import 'package:genius_lens/pages/profile/follower_list_page.dart';
+import 'package:genius_lens/pages/profile/help_page.dart';
 import 'package:genius_lens/pages/profile/manage_model_page.dart';
+import 'package:genius_lens/pages/profile/settings_page.dart';
 import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/detail/detail_page.dart';
 import 'package:genius_lens/pages/favorite/favorite_page.dart';
@@ -41,41 +44,50 @@ class AppRouter {
   static const String manageModelPage = '/manage';
   static const String functionPage = '/function';
   static const String detailPage = '/detail';
-
+  static const String settingPage = '/setting';
+  static const String helpPage = '/help';
   static const String messagePage = '/message';
+  static const String aboutPage = '/about';
 
   /// Route map for build a page with route name
-  static Map<String, Widget Function(BuildContext)> routes = {
-    home: (context) => const Text('Home'),
-    login: (context) => const Text('Login'),
-    register: (context) => const Text('Register'),
-    mainPage: (context) => const Text('Main'),
-    modelCreatePage: (context) => const ModelCreatePage(),
-    selectModelPage : (context) => const ModelSelectPage(),
-
-    soloGeneratePage: (context) => const SoloGeneratePage(),
-    multiGeneratePage: (context) => const MultiGeneratePage(),
-    generateResultPage: (context) => const GenerateResultPage(),
-
-    favoritePage: (context) => const FavoritePage(),
-    communityPage: (context) => const CommunityPage(),
-    communityDetailPage: (context) => const CommunityDetailPage(),
-
-    profilePage: (context) => const ProfilePage(),
-    followerListPage: (context) => const FollowerListPage(),
-    manageModelPage: (context) => const ManageModelPage(),
-
-    functionPage: (context) => const FunctionPage(),
-    detailPage: (context) => const DetailPage(),
-
-    messagePage: (context) => const MessagePage(),
+  static Map<String, Widget Function()> routes = {
+    home: () => const Text('Home'),
+    login: () => const Text('Login'),
+    register: () => const Text('Register'),
+    mainPage: () => const Text('Main'),
+    modelCreatePage: () => const ModelCreatePage(),
+    selectModelPage: () => const ModelSelectPage(),
+    soloGeneratePage: () => const SoloGeneratePage(),
+    multiGeneratePage: () => const MultiGeneratePage(),
+    generateResultPage: () => const GenerateResultPage(),
+    favoritePage: () => const FavoritePage(),
+    communityPage: () => const CommunityPage(),
+    communityDetailPage: () => const CommunityDetailPage(),
+    profilePage: () => const ProfilePage(),
+    settingPage: () => const SettingPage(),
+    followerListPage: () => const FollowerListPage(),
+    manageModelPage: () => const ManageModelPage(),
+    functionPage: () => const FunctionPage(),
+    detailPage: () => const DetailPage(),
+    helpPage: () => const HelpPage(),
+    messagePage: () => const MessagePage(),
+    aboutPage: () => const AboutPage(),
   };
 
   /// Generate route for not found page
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    if (routes.containsKey(settings.name)) {
-      return MaterialPageRoute(
-          builder: (context) => routes[settings.name]!(context));
+    String name = settings.name!;
+    // 除去参数
+    if (name.contains('?')) {
+      name = name.substring(0, name.indexOf('?'));
+    }
+    if (routes.containsKey(name)) {
+      return GetPageRoute(
+        settings: settings,
+        page: routes[name]!,
+        transition: Transition.cupertino,
+        transitionDuration: const Duration(milliseconds: 300),
+      );
     }
     return MaterialPageRoute(
       builder: (context) => const NotFoundPage(),

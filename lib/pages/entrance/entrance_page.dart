@@ -1,5 +1,8 @@
 import 'package:card_swiper/card_swiper.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:genius_lens/api/generate.dart';
+import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
@@ -11,8 +14,22 @@ class EntrancePage extends StatefulWidget {
 }
 
 class _EntrancePageState extends State<EntrancePage> {
-  final List<String> _labels = ["热门", "最新", "AI分身", "AI模板"];
+  final List<String> _labels = ["热门", "最新", "推荐"];
+  final List<FunctionVO> _functions = [];
   int _selectedIndex = 0;
+
+  Future<void> _loadFunctions() async {
+    var list = await GenerateApi.getRecommendFunction("all");
+    setState(() {
+      _functions.addAll(list);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFunctions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +41,20 @@ class _EntrancePageState extends State<EntrancePage> {
             const SliverToBoxAdapter(child: _Functions()),
             const SliverToBoxAdapter(child: _AIModels()),
             SliverToBoxAdapter(child: _TemplatesHeader(labels: _labels)),
-            SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                      (context, index) => const _TemplateItem(),
-                  childCount: 10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3),
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) =>
+                      _TemplateItem(function: _functions[index]),
+                  childCount: _functions.length,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+              ),
             ),
             const SliverToBoxAdapter(child: _EndText()),
           ],
@@ -63,7 +88,7 @@ class _HeaderState extends State<_Header> {
             child: Swiper(
               itemCount: 3,
               itemBuilder: (BuildContext context, int index) {
-                return Image.network(
+                return ExtendedImage.network(
                   "https://picsum.photos/600/300?random=$index",
                   fit: BoxFit.cover,
                 );
@@ -101,7 +126,8 @@ class _HeaderState extends State<_Header> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
                 child: const Text("创建AI分身",
                     style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
@@ -124,23 +150,27 @@ class _FunctionsState extends State<_Functions> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const Expanded(child: _FunctionItem(label: "所有功能")),
-            ...List.generate(
-              3,
-              (index) => const Expanded(
-                child: _FunctionItem(icon: Icons.camera_alt_outlined),
-              ),
-            ),
-          ],
-        ));
+      padding: const EdgeInsets.all(16),
+      child: const Row(
+        children: [
+          // const Expanded(child: _CategoryItem(label: "所有功能")),
+          Expanded(
+            child: _CategoryItem(icon: Icons.camera_alt_outlined),
+          ),
+          Expanded(
+            child: _CategoryItem(icon: Icons.video_camera_front_outlined),
+          ),
+          Expanded(
+            child: _CategoryItem(icon: Icons.music_note_outlined),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _FunctionItem extends StatelessWidget {
-  const _FunctionItem({super.key, this.icon, this.label});
+class _CategoryItem extends StatelessWidget {
+  const _CategoryItem({super.key, this.icon, this.label});
 
   final IconData? icon;
   final String? label;
@@ -195,6 +225,21 @@ class _AIModels extends StatefulWidget {
 }
 
 class _AIModelsState extends State<_AIModels> {
+  final List<LoraVO> _models = [];
+
+  Future<void> _loadModels() async {
+    var list = await GenerateApi.getUserLoraList();
+    setState(() {
+      _models.addAll(list);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadModels();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -208,12 +253,12 @@ class _AIModelsState extends State<_AIModels> {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            height: 200,
+            height: 224,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: 5,
+              itemCount: _models.length,
               itemBuilder: (BuildContext context, int index) {
-                return const _AIModelItem();
+                return _AIModelItem(lora: _models[index]);
               },
             ),
           ),
@@ -224,36 +269,76 @@ class _AIModelsState extends State<_AIModels> {
 }
 
 class _AIModelItem extends StatelessWidget {
-  const _AIModelItem({super.key});
+  const _AIModelItem({super.key, required this.lora});
+
+  final LoraVO lora;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: Center(
-        child: GestureDetector(
-          onTap: () => Get.toNamed(AppRouter.manageModelPage),
-          child: Container(
-            height: 172,
-            width: 128,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: context.theme.cardColor,
-              borderRadius: BorderRadius.circular(8),
-              image: const DecorationImage(
-                image: NetworkImage("https://picsum.photos/200/300"),
-                fit: BoxFit.cover,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => Get.toNamed(AppRouter.manageModelPage),
+            child: Container(
+              height: 172,
+              width: 128,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.theme.cardColor,
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: ExtendedImage.network(
+                    lora.avatar,
+                    cache: true,
+                    loadStateChanged: (state) {
+                      if (state.extendedImageLoadState == LoadState.loading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (state.extendedImageLoadState ==
+                          LoadState.failed) {
+                        return const Center(
+                          child: Icon(Icons.error),
+                        );
+                      }
+                      return null;
+                    },
+                  ).image,
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withOpacity(0.06),
                   blurRadius: 8,
-                  offset: const Offset(0, 4),
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
+            child: Text(
+              lora.name ?? '',
+              style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -310,19 +395,35 @@ class _TemplatesHeaderState extends State<_TemplatesHeader> {
 }
 
 class _TemplateItem extends StatelessWidget {
-  const _TemplateItem({super.key});
+  const _TemplateItem({super.key, required this.function});
+
+  final FunctionVO function;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 128,
       height: 128,
-      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        image: const DecorationImage(
-          image: NetworkImage("https://picsum.photos/200/300"),
+        image: DecorationImage(
+          image: ExtendedImage.network(
+            function.url!,
+            cache: true,
+            loadStateChanged: (state) {
+              if (state.extendedImageLoadState == LoadState.loading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (state.extendedImageLoadState == LoadState.failed) {
+                return const Center(
+                  child: Icon(Icons.error),
+                );
+              }
+              return null;
+            },
+          ).image,
           fit: BoxFit.cover,
         ),
         boxShadow: [
@@ -332,6 +433,36 @@ class _TemplateItem extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: GestureDetector(
+        onTap: () {
+          switch (function.type) {
+            case "solo":
+              Get.toNamed(AppRouter.soloGeneratePage, arguments: function);
+              break;
+            case "multi":
+              Get.toNamed(AppRouter.multiGeneratePage, arguments: function);
+              break;
+            default:
+              break;
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(8),
+          alignment: Alignment.bottomCenter,
+          child: Text(
+            function.name!,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ),
     );
   }

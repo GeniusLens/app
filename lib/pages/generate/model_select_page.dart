@@ -1,6 +1,10 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+
+import '../../api/generate.dart';
+import '../../data/entity/generate.dart';
 
 class ModelSelectPage extends StatefulWidget {
   const ModelSelectPage({super.key});
@@ -10,6 +14,25 @@ class ModelSelectPage extends StatefulWidget {
 }
 
 class _ModelSelectPageState extends State<ModelSelectPage> {
+  late final CategoryVO category;
+  final List<FunctionVO> _functions = [];
+
+  Future<void> _loadFunctions() async {
+    var list = await GenerateApi.getFunctionList(category.name);
+    print("Loading functions: $list");
+    setState(() {
+      _functions.clear();
+      _functions.addAll(list);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    category = Get.arguments as CategoryVO;
+    _loadFunctions();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,15 +42,18 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
       ),
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: GridView.builder(
           padding: const EdgeInsets.symmetric(vertical: 16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 0.8,
+            mainAxisSpacing: 8,
           ),
-          itemCount: 10,
-          itemBuilder: (context, index) => const _ModelItem(),
+          itemCount: _functions.length,
+          itemBuilder: (context, index) =>
+              _ModelItem(function: _functions[index]),
         ),
       ),
     );
@@ -35,7 +61,9 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
 }
 
 class _ModelItem extends StatelessWidget {
-  const _ModelItem({super.key});
+  const _ModelItem({super.key, required this.function});
+
+  final FunctionVO function;
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +86,27 @@ class _ModelItem extends StatelessWidget {
           Expanded(
             child: Container(
               height: 128,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(16)),
+                    const BorderRadius.vertical(top: Radius.circular(16)),
                 image: DecorationImage(
-                  image: NetworkImage('https://picsum.photos/200/300'),
+                  image: ExtendedImage.network(
+                    function.url ?? 'https://picsum.photos/200/300',
+                    cache: true,
+                    loadStateChanged: (state) {
+                      if (state.extendedImageLoadState == LoadState.loading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (state.extendedImageLoadState ==
+                          LoadState.failed) {
+                        return const Center(
+                          child: Icon(Icons.error),
+                        );
+                      }
+                      return null;
+                    },
+                  ).image,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -72,11 +116,23 @@ class _ModelItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('名称', style: TextStyle(fontSize: 16)),
+                Text(function.name ?? '', style: const TextStyle(fontSize: 16)),
                 const Spacer(),
-                 GestureDetector(
-                   onTap: () => Get.toNamed(AppRouter.soloGeneratePage),
+                GestureDetector(
+                  onTap: () {
+                    switch (function.type) {
+                      case 'solo':
+                        Get.toNamed(AppRouter.soloGeneratePage, arguments: function);
+                        break;
+                      case 'multi':
+                        Get.toNamed(AppRouter.multiGeneratePage, arguments: function);
+                        break;
+                      default:
+                        Get.snackbar('错误', '未知的模型类型');
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -90,7 +146,7 @@ class _ModelItem extends StatelessWidget {
                       '使用',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 14,
                       ),
                     ),
                   ),
