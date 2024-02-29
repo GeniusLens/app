@@ -15,7 +15,7 @@ class HttpUtil {
   // 公共请求头，支持添加新的请求头
   static final Map<String, String> _headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MjI0OTAyLCJleHAiOjE3MDkzMTEzMDJ9.zzWHNASKCYiyVeAE-HOnrfip6daPlVK0Y2aAXcJDM54',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MjMyMzA0LCJleHAiOjE3MDkzMTg3MDR9.n0sW7dO4ZoZFPjVrQBn05m2hlzC5tCnAEkJWMmN9aS8',
   };
 
   // 添加请求头

@@ -44,6 +44,9 @@ class _ModelManagePageState extends State<ModelManagePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('创建分身'),
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Column(
         children: [
