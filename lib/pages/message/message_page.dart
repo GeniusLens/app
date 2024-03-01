@@ -1,5 +1,11 @@
+import 'dart:collection';
+
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../api/common.dart';
+import '../../data/entity/common.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({super.key});
@@ -12,11 +18,25 @@ class _MessagePageState extends State<MessagePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final List<String> tabs = ["喜欢", "评论", "系统消息"];
+  final Map<String, int> _tabType = {
+    "喜欢": 1,
+    "评论": 2,
+    "系统消息": 3,
+  };
+  final List<MessageVO> messages = [];
+
+  Future<void> _loadData() async {
+    var data = await CommonAPi.getMessages();
+    setState(() {
+      messages.addAll(data);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: tabs.length, vsync: this);
+    _loadData();
   }
 
   @override
@@ -49,8 +69,31 @@ class _MessagePageState extends State<MessagePage>
         children: tabs.map((e) {
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: 10,
-            itemBuilder: (context, index) => _MessageCard(),
+            // 只选择对应的type
+            itemCount: messages
+                .where((element) => element.type == _tabType[e])
+                .toList()
+                .length + 1,
+            itemBuilder: (context, index) {
+              if (index == messages.where((element) => element.type == _tabType[e]).toList().length) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: const Center(
+                    child: Text(
+                      '已经到底部啦',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return _MessageCard(
+                data: messages
+                    .where((element) => element.type == _tabType[e])
+                    .toList()[index],
+              );
+            },
           );
         }).toList(),
       ),
@@ -59,7 +102,9 @@ class _MessagePageState extends State<MessagePage>
 }
 
 class _MessageCard extends StatelessWidget {
-  const _MessageCard({super.key});
+  const _MessageCard({super.key, required this.data});
+
+  final MessageVO data;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +130,14 @@ class _MessageCard extends StatelessWidget {
             child: CircleAvatar(
               backgroundColor: Colors.grey,
               radius: 24,
-              child: const Icon(Icons.person, color: Colors.white),
+              child: ExtendedImage.network(
+                data.senderAvatar ?? '',
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                shape: BoxShape.circle,
+                cache: true,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -93,18 +145,23 @@ class _MessageCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('用户',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(
+                  data.sender ?? '',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 8),
-                Text('内容', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(
+                  data.message,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ],
             ),
           ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              '时间',
+              data.time,
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           )

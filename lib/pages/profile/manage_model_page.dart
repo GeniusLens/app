@@ -165,6 +165,19 @@ class _InfoCard extends StatelessWidget {
 
   final LoraVO model;
 
+  Color _buildColor() {
+    switch (model.status ?? 0) {
+      case 0:
+        return Colors.green;
+      case 1:
+        return Colors.orange;
+      case -1:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -186,6 +199,8 @@ class _InfoCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Icon(Icons.circle, color: _buildColor(), size: 16),
+              const SizedBox(width: 4),
               Text(model.name ?? '',
                   style: TextStyle(
                       fontSize: 24,

@@ -102,7 +102,7 @@ class _BottomItem extends StatelessWidget {
           size: 6,
           color: Colors.redAccent,
         ),
-        isLabelVisible: hasNotification,
+        isLabelVisible: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[

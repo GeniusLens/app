@@ -46,12 +46,19 @@ class FunctionVO {
 class LoraVO {
   final String? name;
   final String? description;
+
   // final List<String>? images;
   final String avatar;
   final bool? defaultFlag;
+  final int status;
 
   LoraVO(
-      this.name, this.description, this.avatar, this.defaultFlag);
+    this.name,
+    this.description,
+    this.avatar,
+    this.defaultFlag,
+    this.status,
+  );
 
   factory LoraVO.fromJson(Map<String, dynamic> json) => _$LoraVOFromJson(json);
 
@@ -71,7 +78,8 @@ class SampleVO {
 
   SampleVO(this.name, this.type, this.url);
 
-  factory SampleVO.fromJson(Map<String, dynamic> json) => _$SampleVOFromJson(json);
+  factory SampleVO.fromJson(Map<String, dynamic> json) =>
+      _$SampleVOFromJson(json);
 
   Map<String, dynamic> toJson() => _$SampleVOToJson(this);
 
