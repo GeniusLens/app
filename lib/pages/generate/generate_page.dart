@@ -175,7 +175,7 @@ class _GenerateItem extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 Expanded(

@@ -72,6 +72,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(
                 _steps.length,
                 (index) => GestureDetector(
@@ -83,7 +84,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     margin: const EdgeInsets.only(right: 8),
                     child: Text(
-                      _steps[index],
+                      '${index + 1}. ${_steps[index]}',
                       style: TextStyle(
                         fontSize: 16,
                         color: _selectedIndex == index
@@ -100,6 +101,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
       ),
       floatingActionButton: (_selectedIndex == 1)
           ? FloatingActionButton(
+              shape: const CircleBorder(),
               onPressed: () async {
                 Get.snackbar('创建成功', '请前往我的分身查看',
                     snackPosition: SnackPosition.BOTTOM);
@@ -132,7 +134,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         Get.snackbar('上传失败', '请检查网络连接或稍后重试',
                             snackPosition: SnackPosition.BOTTOM);
                       }
-                      Future.delayed(const Duration(milliseconds: 500), () {
+                      Future.delayed(const Duration(milliseconds: 300), () {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
@@ -451,7 +453,17 @@ class _BasePageState extends State<_BasePage> {
             },
           ),
         ),
-        const SizedBox(height: 64),
+        // 隐私声明
+        SizedBox(
+          height: 32,
+          child: Text(
+            '点击下一步，即表示您同意《隐私声明》',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
       ],
     );
   }

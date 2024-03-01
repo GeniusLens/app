@@ -37,7 +37,7 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('选择模型'),
+        title:  Text(category.name ?? ''),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,

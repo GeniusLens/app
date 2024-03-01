@@ -19,6 +19,7 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
   final List<LoraVO> _loras = [];
   int _index = 0;
   int _selected = -1;
+  DateTime _lastTime = DateTime.now();
 
   Future<void> _fetchLoraList() async {
     var list = await GenerateApi.getUserLoraList();
@@ -39,7 +40,7 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('单人生成'),
+        title: Text(function.name ?? ''),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -79,74 +80,98 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                 ),
               ),
             if (_loras.isNotEmpty)
-              Row(
-                children: [
-                  Expanded(
-                    child: IconButton(
-                      onPressed: () {
-                        if (_index > 0) {
-                          setState(() => _index--);
-                        } else {
-                          setState(() => _index = _loras.length - 1);
-                        }
-                      },
-                      icon: const Icon(Icons.chevron_left, size: 48),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 224,
-                    width: 224,
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: BoxDecoration(
-                      // color: context.theme.cardColor,
-                      shape: BoxShape.circle,
-                      border: (_selected == _index)
-                          ? Border.all(
-                              color:
-                                  context.theme.primaryColor.withOpacity(0.8),
-                              width: 2,
-                            )
-                          : null,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 12,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_selected != _index) {
-                          setState(() => _selected = _index);
-                        } else {
-                          setState(() => _selected = -1);
-                        }
-                      },
-                      child: CircleAvatar(
-                        radius: 224,
-                        backgroundImage: ExtendedImage.network(
-                          _loras[_index].avatar,
-                          fit: BoxFit.cover,
-                        ).image,
+              GestureDetector(
+                // 监听左右滑动
+                onHorizontalDragUpdate: (details) {
+                  // 滑动距离小于阈值不触发
+                  if (details.primaryDelta!.abs() < 4) return;
+                  // 时间间隔小于阈值不触发
+                  if (DateTime.now().difference(_lastTime).inMilliseconds < 300)
+                    return;
+                  if (details.primaryDelta! > 0) {
+                    if (_index > 0) {
+                      setState(() => _index--);
+                    } else {
+                      setState(() => _index = _loras.length - 1);
+                    }
+                  } else {
+                    if (_index < _loras.length - 1) {
+                      setState(() => _index++);
+                    } else {
+                      setState(() => _index = 0);
+                    }
+                  }
+                  _lastTime = DateTime.now();
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: IconButton(
+                        onPressed: () {
+                          if (_index > 0) {
+                            setState(() => _index--);
+                          } else {
+                            setState(() => _index = _loras.length - 1);
+                          }
+                        },
+                        icon: const Icon(Icons.chevron_left, size: 48),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      onPressed: () {
-                        if (_index < _loras.length - 1) {
-                          setState(() => _index++);
-                        } else {
-                          setState(() => _index = 0);
-                        }
-                      },
-                      icon: const Icon(Icons.chevron_right, size: 48),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 224,
+                      width: 224,
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 8),
+                      decoration: BoxDecoration(
+                        // color: context.theme.cardColor,
+                        shape: BoxShape.circle,
+                        border: (_selected == _index)
+                            ? Border.all(
+                                color:
+                                    context.theme.primaryColor.withOpacity(0.8),
+                                width: 2,
+                              )
+                            : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 12,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_selected != _index) {
+                            setState(() => _selected = _index);
+                          } else {
+                            setState(() => _selected = -1);
+                          }
+                        },
+                        child: CircleAvatar(
+                          radius: 224,
+                          backgroundImage: ExtendedImage.network(
+                            _loras[_index].avatar,
+                            fit: BoxFit.cover,
+                          ).image,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: IconButton(
+                        onPressed: () {
+                          if (_index < _loras.length - 1) {
+                            setState(() => _index++);
+                          } else {
+                            setState(() => _index = 0);
+                          }
+                        },
+                        icon: const Icon(Icons.chevron_right, size: 48),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             Padding(
               padding: const EdgeInsets.all(8),
