@@ -7,7 +7,7 @@ import '../data/entity/result.dart';
 import 'http.dart';
 
 class CommonAPi {
-  static const String _baseUrl = "https://upload.thuray.workers.dev";
+  static const String _baseUrl = "https://upload.thuray.xyz";
   static const String _prefix = "/common";
 
   static Future<bool> uploadImage(String path) async {
