@@ -1,10 +1,15 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:genius_lens/api/common.dart';
+import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:badges/badges.dart' as badges;
+
+import '../../api/generate.dart';
+import '../../data/entity/generate.dart';
 
 class ModelCreatePage extends StatefulWidget {
   const ModelCreatePage({super.key});
@@ -23,7 +28,18 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
 
   final ImagePicker _imagePicker = ImagePicker();
   XFile? _frontImage;
+  bool _isOtherLoading = false;
   final List<XFile> _otherImages = [];
+
+  final List<SampleVO> _samples = [];
+
+  Future<void> _loadSamples() async {
+    var result = await GenerateApi.getSamples(0);
+    print(result);
+    setState(() {
+      _samples.addAll(result);
+    });
+  }
 
   @override
   void initState() {
@@ -34,6 +50,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
         _selectedIndex = _pageController.page!.round();
       });
     });
+    _loadSamples();
   }
 
   @override
@@ -47,6 +64,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('创建分身'),
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
@@ -78,6 +98,18 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
           ),
         ),
       ),
+      floatingActionButton: (_selectedIndex == 1)
+          ? FloatingActionButton(
+              onPressed: () async {
+                Get.snackbar('创建成功', '请前往我的分身查看',
+                    snackPosition: SnackPosition.BOTTOM);
+                Future.delayed(const Duration(milliseconds: 1000), () {
+                  Get.toNamed(AppRouter.manageModelPage);
+                });
+              },
+              child: const Icon(Icons.check),
+            )
+          : null,
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _selectedIndex = index),
@@ -95,12 +127,17 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                       setState(() {
                         _frontImage = file;
                       });
-                      // 等待
-                      await Future.delayed(const Duration(milliseconds: 300));
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
+                      var result = await CommonAPi.uploadImage(file.path);
+                      if (!result) {
+                        Get.snackbar('上传失败', '请检查网络连接或稍后重试',
+                            snackPosition: SnackPosition.BOTTOM);
+                      }
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      });
                     }
                   },
                   child: AnimatedSize(
@@ -149,126 +186,141 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                 const Spacer(),
               ],
             ),
-            goodSamples: [
-              'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-              'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-            ],
-            badSamples: [
-              'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-              'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-            ],
+            goodSamples: _samples
+                .where((element) => element.type == 1)
+                .map((e) => e.url)
+                .toList(),
+            badSamples: _samples
+                .where((element) => element.type == 2)
+                .map((e) => e.url)
+                .toList(),
           ),
           _BasePage(
-              content: Container(
-                padding: const EdgeInsets.all(16),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemCount: _otherImages.length + 1,
-                  itemBuilder: (context, index) {
-                    var content = index < _otherImages.length
-                        ? Image.file(
-                            File(_otherImages[index].path),
-                            fit: BoxFit.fill,
-                          )
-                        : Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 48,
-                              color: Colors.grey[600],
-                            ),
-                          );
-                    return GestureDetector(
-                      onTap: () async {
-                        if (index < _otherImages.length) {
-                          // 弹窗询问是否删除
-                          bool? result = await Get.dialog<bool>(
-                            AlertDialog(
-                              title: const Text('删除照片'),
-                              content: const Text('确定要删除这张照片吗？'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Get.back(result: false),
-                                  child: const Text('取消'),
+            content: Container(
+              padding: const EdgeInsets.all(16),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                itemCount: _otherImages.length + 1,
+                itemBuilder: (context, index) {
+                  var content = index < _otherImages.length
+                      ? Image.file(
+                          File(_otherImages[index].path),
+                          fit: BoxFit.fill,
+                        )
+                      : Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: (_isOtherLoading)
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : Icon(
+                                  Icons.add,
+                                  size: 48,
+                                  color: Colors.grey[600],
                                 ),
-                                TextButton(
-                                  onPressed: () => Get.back(result: true),
-                                  child: const Text('确定'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (result == true) {
-                            setState(() {
-                              _otherImages.removeAt(index);
-                            });
-                          }
-                          return;
-                        }
-
-                        XFile? file = await _imagePicker.pickImage(
-                          source: ImageSource.gallery,
                         );
-                        if (file != null) {
+                  return GestureDetector(
+                    onTap: () async {
+                      if (index < _otherImages.length) {
+                        // 弹窗询问是否删除
+                        bool? result = await Get.dialog<bool>(
+                          AlertDialog(
+                            title: const Text('删除照片'),
+                            content: const Text('确定要删除这张照片吗？'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Get.back(result: false),
+                                child: const Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () => Get.back(result: true),
+                                child: const Text('确定'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (result == true) {
                           setState(() {
-                            _otherImages.add(file);
+                            _otherImages.removeAt(index);
                           });
                         }
-                      },
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: content,
-                            ),
+                        return;
+                      }
+
+                      XFile? file = await _imagePicker.pickImage(
+                        source: ImageSource.gallery,
+                      );
+                      if (file != null) {
+                        setState(() {
+                          _isOtherLoading = true;
+                        });
+                        var result = await CommonAPi.uploadImage(file.path);
+                        if (!result) {
+                          Get.snackbar('上传失败', '请检查网络连接或稍后重试',
+                              snackPosition: SnackPosition.BOTTOM);
+                          return;
+                        }
+                        setState(() {
+                          _otherImages.add(file);
+                          _isOtherLoading = false;
+                        });
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: content,
                           ),
-                          const SizedBox(height: 4),
-                          if (index < _otherImages.length)
-                            Row(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 4, vertical: 4),
-                                  child: Icon(Icons.circle,
-                                      size: 8, color: Colors.green),
+                        ),
+                        const SizedBox(height: 4),
+                        if (index < _otherImages.length)
+                          Row(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 4),
+                                child: Icon(Icons.circle,
+                                    size: 8, color: Colors.green),
+                              ),
+                              Text(
+                                ' 正面',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[800],
                                 ),
-                                Text(
-                                  ' 正面',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[800],
-                                  ),
-                                ),
-                                const Spacer(),
-                              ],
-                            )
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                              ),
+                              const Spacer(),
+                            ],
+                          )
+                      ],
+                    ),
+                  );
+                },
               ),
-              explain: [
-                '请上传一张正面照片，确保照片中的人脸清晰可见。',
-                '请上传一张或多张其他照片，确保照片中的人脸清晰可见。',
-              ],
-              goodSamples: [
-                'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-                'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-              ],
-              badSamples: [
-                'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-                'https://picsum.photos/seed/${Random().nextInt(100)}/200',
-              ]),
+            ),
+            explain: const [
+              '请上传一张正面照片，确保照片中的人脸清晰可见。',
+              '请上传一张或多张其他照片，确保照片中的人脸清晰可见。',
+            ],
+            goodSamples: _samples
+                .where((element) => element.type == 1)
+                .map((e) => e.url)
+                .toList(),
+            badSamples: _samples
+                .where((element) => element.type == 2)
+                .map((e) => e.url)
+                .toList(),
+          ),
         ],
       ),
     );
@@ -348,21 +400,36 @@ class _BasePageState extends State<_BasePage> {
             scrollDirection: Axis.horizontal,
             itemCount: widget.goodSamples.length + widget.badSamples.length,
             itemBuilder: (context, index) {
-              return SizedBox(
-                width: 96,
-                height: 96,
+              return Container(
+                margin: const EdgeInsets.only(right: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          index < widget.goodSamples.length
-                              ? widget.goodSamples[index]
-                              : widget.badSamples[
-                                  index - widget.goodSamples.length],
-                          fit: BoxFit.fill,
+                      child: SizedBox(
+                        width: 96,
+                        height: 96,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: ExtendedImage.network(
+                            index < widget.goodSamples.length
+                                ? widget.goodSamples[index]
+                                : widget.badSamples[
+                                    index - widget.goodSamples.length],
+                            cache: true,
+                            loadStateChanged: (state) {
+                              if (state.extendedImageLoadState ==
+                                  LoadState.loading) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return ExtendedRawImage(
+                                  image: state.extendedImageInfo?.image,
+                                  fit: BoxFit.cover);
+                            },
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),

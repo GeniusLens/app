@@ -55,4 +55,14 @@ class GenerateApi {
     }
     return list;
   }
+
+  static Future<List<SampleVO>> getSamples(int functionId) async {
+    var response = await HttpUtil.get('$_prefix/function/sample', queryParameters: {'id': functionId});
+    var wrapper = Result.fromJson(response.data);
+    List<SampleVO> list = [];
+    for (var item in wrapper.data) {
+      list.add(SampleVO.fromJson(item));
+    }
+    return list;
+  }
 }

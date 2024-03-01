@@ -4,18 +4,22 @@ class HttpUtil {
   // static const String baseUrl = 'https://genius-lens.thuray.xyz';
   static const String baseUrl = 'http://10.10.10.206:10086';
 
-
   // 构造Dio单例
-  static final Dio _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: const Duration(milliseconds: 3000),
-    receiveTimeout: const Duration(milliseconds: 3000),
-  ));
+  static final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(milliseconds: 10000),
+      receiveTimeout: const Duration(milliseconds: 10000),
+    ),
+  )..interceptors.add(
+      LogInterceptor(responseBody: true),
+    );
 
   // 公共请求头，支持添加新的请求头
   static final Map<String, String> _headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MjMyMzA0LCJleHAiOjE3MDkzMTg3MDR9.n0sW7dO4ZoZFPjVrQBn05m2hlzC5tCnAEkJWMmN9aS8',
+    'Authorization':
+        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MjMyMzA0LCJleHAiOjE3MDkzMTg3MDR9.n0sW7dO4ZoZFPjVrQBn05m2hlzC5tCnAEkJWMmN9aS8',
   };
 
   // 添加请求头
@@ -61,6 +65,20 @@ class HttpUtil {
     Map<String, dynamic>? queryParameters,
   }) {
     return _dio.delete<T>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: Options(headers: _headers),
+    );
+  }
+
+  // PUT请求
+  static Future<Response<T>> put<T>(
+    String path, {
+    data,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _dio.put<T>(
       path,
       data: data,
       queryParameters: queryParameters,

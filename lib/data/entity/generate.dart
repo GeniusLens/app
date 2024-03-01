@@ -62,3 +62,21 @@ class LoraVO {
     return toJson().toString();
   }
 }
+
+@JsonSerializable()
+class SampleVO {
+  final String name;
+  final int type;
+  final String url;
+
+  SampleVO(this.name, this.type, this.url);
+
+  factory SampleVO.fromJson(Map<String, dynamic> json) => _$SampleVOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SampleVOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+}
