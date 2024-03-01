@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'profile.g.dart';
 
 @JsonSerializable()
-class ProfileEntity {
+class UserVO {
   final String nickname;
   final String avatarUrl;
   final String? signature;
@@ -12,7 +12,7 @@ class ProfileEntity {
   final int followCount;
   final int fansCount;
 
-  ProfileEntity({
+  UserVO({
     required this.nickname,
     required this.avatarUrl,
     this.signature,
@@ -21,7 +21,7 @@ class ProfileEntity {
     required this.fansCount,
   });
 
-  factory ProfileEntity.fromJson(Map<String, dynamic> json) =>
+  factory UserVO.fromJson(Map<String, dynamic> json) =>
       _$ProfileEntityFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProfileEntityToJson(this);

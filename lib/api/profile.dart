@@ -4,11 +4,11 @@ import 'dart:math';
 import 'package:genius_lens/data/entity/profile.dart';
 
 class ProfileApi {
-  Future<ProfileEntity> getProfile() async {
-    ProfileEntity profile;
+  Future<UserVO> getProfile() async {
+    UserVO profile;
 
     Future.delayed(Duration(milliseconds: Random().nextInt(1000) + 200));
-    profile = ProfileEntity(
+    profile = UserVO(
       nickname: 'nickname',
       avatarUrl: 'https://picsum.photos/200/300',
       signature: Random().nextBool() ? 'signature' : null,

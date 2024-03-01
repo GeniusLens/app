@@ -7,7 +7,6 @@ class GenerateApi {
   static const String _prefix = '/generate';
 
   static Future<List<CategoryVO>> getCategoryList() async {
-    print('getCategoryList');
     var response = await HttpUtil.get('$_prefix/category/list');
     var wrapper = Result.fromJson(response.data);
     List<CategoryVO> list = [];

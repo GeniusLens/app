@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
 class HttpUtil {
-  static const String baseUrl = 'https://genius-lens.thuray.xyz';
-  // static const String baseUrl = 'http://10.10.10.206:10086';
+  // static const String baseUrl = 'https://genius-lens.thuray.xyz';
+  static const String baseUrl = 'http://10.10.10.206:10086';
 
 
   // 构造Dio单例
