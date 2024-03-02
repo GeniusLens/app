@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -67,34 +65,44 @@ class _MessagePageState extends State<MessagePage>
       body: TabBarView(
         controller: _tabController,
         children: tabs.map((e) {
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            // 只选择对应的type
-            itemCount: messages
-                .where((element) => element.type == _tabType[e])
-                .toList()
-                .length + 1,
-            itemBuilder: (context, index) {
-              if (index == messages.where((element) => element.type == _tabType[e]).toList().length) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: const Center(
-                    child: Text(
-                      '已经到底部啦',
-                      style: TextStyle(
-                        color: Colors.grey,
+          return RefreshIndicator(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                // 只选择对应的type
+                itemCount: messages
+                        .where((element) => element.type == _tabType[e])
+                        .toList()
+                        .length +
+                    1,
+                itemBuilder: (context, index) {
+                  if (index ==
+                      messages
+                          .where((element) => element.type == _tabType[e])
+                          .toList()
+                          .length) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: const Center(
+                        child: Text(
+                          '已经到底部啦',
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }
-              return _MessageCard(
-                data: messages
-                    .where((element) => element.type == _tabType[e])
-                    .toList()[index],
-              );
-            },
-          );
+                    );
+                  }
+                  return _MessageCard(
+                    data: messages
+                        .where((element) => element.type == _tabType[e])
+                        .toList()[index],
+                  );
+                },
+              ),
+              onRefresh: () {
+                messages.clear();
+                return _loadData();
+              });
         }).toList(),
       ),
     );

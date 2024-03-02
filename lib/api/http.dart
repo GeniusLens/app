@@ -19,7 +19,7 @@ class HttpUtil {
   static final Map<String, String> _headers = {
     'Content-Type': 'application/json',
     'Authorization':
-        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MjMyMzA0LCJleHAiOjE3MDkzMTg3MDR9.n0sW7dO4ZoZFPjVrQBn05m2hlzC5tCnAEkJWMmN9aS8',
+        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MzYxMzY1LCJleHAiOjE3MDk2MjA1NjV9.901O2Crqr7e1KJg1t_TXatfl_JW3YvDsMs7E2iTJiXA',
   };
 
   // 添加请求头
