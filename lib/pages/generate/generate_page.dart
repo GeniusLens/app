@@ -4,7 +4,7 @@ import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
-import '../../api/generate.dart';
+import '../../api/request/generate.dart';
 
 class GeneratePage extends StatefulWidget {
   const GeneratePage({super.key});

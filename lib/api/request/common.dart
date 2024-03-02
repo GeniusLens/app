@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:genius_lens/data/entity/common.dart';
 import 'package:uuid/uuid.dart';
 
-import '../data/entity/result.dart';
-import 'http.dart';
+import '../../data/entity/result.dart';
+import '../http.dart';
 
 class CommonAPi {
   static const String _baseUrl = "https://upload.thuray.xyz";

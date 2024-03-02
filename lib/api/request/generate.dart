@@ -1,7 +1,7 @@
 import 'package:genius_lens/api/http.dart';
 import 'package:genius_lens/data/entity/result.dart';
 
-import '../data/entity/generate.dart';
+import '../../data/entity/generate.dart';
 
 class GenerateApi {
   static const String _prefix = '/generate';

@@ -7,6 +7,8 @@ import 'package:genius_lens/pages/generate/generate_result_page.dart';
 import 'package:genius_lens/pages/generate/model_select_page.dart';
 import 'package:genius_lens/pages/generate/multi_generate_page.dart';
 import 'package:genius_lens/pages/generate/solo_generate_page.dart';
+import 'package:genius_lens/pages/index.dart';
+import 'package:genius_lens/pages/login/login_page.dart';
 import 'package:genius_lens/pages/message/message_page.dart';
 import 'package:genius_lens/pages/profile/about_page.dart';
 import 'package:genius_lens/pages/profile/follower_list_page.dart';
@@ -22,7 +24,7 @@ import 'package:get/get.dart';
 
 class AppRouter {
   /// Static route names
-  static const String home = '/';
+  static const String root = '/';
   static const String login = '/login';
   static const String register = '/register';
 
@@ -51,8 +53,8 @@ class AppRouter {
 
   /// Route map for build a page with route name
   static Map<String, Widget Function()> routes = {
-    home: () => const Text('Home'),
-    login: () => const Text('Login'),
+    root: () => const IndexPage(),
+    login: () => const LoginPage(),
     register: () => const Text('Register'),
     mainPage: () => const Text('Main'),
     modelCreatePage: () => const ModelCreatePage(),

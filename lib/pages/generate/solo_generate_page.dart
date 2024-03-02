@@ -4,7 +4,7 @@ import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../../api/generate.dart';
+import '../../api/request/generate.dart';
 import '../../data/entity/generate.dart';
 
 class SoloGeneratePage extends StatefulWidget {

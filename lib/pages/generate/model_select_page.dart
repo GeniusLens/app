@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
-import '../../api/generate.dart';
+import '../../api/request/generate.dart';
 import '../../data/entity/generate.dart';
 
 class ModelSelectPage extends StatefulWidget {

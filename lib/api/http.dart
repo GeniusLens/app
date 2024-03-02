@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:genius_lens/api/inteceptors.dart';
 
 class HttpUtil {
   static const String baseUrl = 'https://genius-lens.thuray.xyz';
+
   // static const String baseUrl = 'http://10.10.10.206:10086';
 
   // 构造Dio单例
@@ -11,15 +13,16 @@ class HttpUtil {
       connectTimeout: const Duration(milliseconds: 10000),
       receiveTimeout: const Duration(milliseconds: 10000),
     ),
-  )..interceptors.add(
+  )..interceptors.addAll([
       LogInterceptor(responseBody: true),
-    );
+      AuthInterceptor(),
+      VersionInterceptor(),
+      ErrorInterceptor(),
+    ]);
 
   // 公共请求头，支持添加新的请求头
   static final Map<String, String> _headers = {
-    'Content-Type': 'application/json',
-    'Authorization':
-        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzA5MzYxMzY1LCJleHAiOjE3MDk2MjA1NjV9.901O2Crqr7e1KJg1t_TXatfl_JW3YvDsMs7E2iTJiXA',
+    'Content-Type': 'application/json'
   };
 
   // 添加请求头

@@ -3,12 +3,12 @@ import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:genius_lens/api/common.dart';
+import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../api/generate.dart';
+import '../../api/request/generate.dart';
 import '../../data/entity/generate.dart';
 
 class ModelCreatePage extends StatefulWidget {

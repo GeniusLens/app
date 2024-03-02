@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/pages/index.dart';
+import 'package:genius_lens/provider/user_provider.dart';
 import 'package:genius_lens/router.dart';
 import 'package:genius_lens/utils/package_util.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,13 +48,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: '创艺相机',
-      theme: lightTheme(),
-      darkTheme: darkTheme(),
-      onGenerateRoute: AppRouter.onGenerateRoute,
-      debugShowCheckedModeBanner: false,
-      home: const IndexPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+      ],
+      child: GetMaterialApp(
+        title: '创艺相机',
+        theme: lightTheme(),
+        darkTheme: darkTheme(),
+        onGenerateRoute: AppRouter.onGenerateRoute,
+        initialRoute: AppRouter.root,
+        debugShowCheckedModeBanner: false,
+        builder: EasyLoading.init(),
+        // home: const IndexPage(),
+      ),
     );
   }
 }
