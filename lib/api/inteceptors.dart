@@ -23,7 +23,8 @@ class VersionInterceptor extends Interceptor {
 }
 
 class ErrorInterceptor extends Interceptor {
-   DateTime _lastRoute = DateTime.now();
+  // 现在的时间减去一分钟
+   DateTime _lastRoute = DateTime.now().subtract(const Duration(minutes: 1));
 
   @override
   void onError(DioException e, ErrorInterceptorHandler handler) {

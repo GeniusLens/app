@@ -131,24 +131,24 @@ class _MessageCard extends StatelessWidget {
         ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey,
-              radius: 24,
-              child: ExtendedImage.network(
-                data.senderAvatar ?? '',
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                shape: BoxShape.circle,
-                cache: true,
+          if (data.senderAvatar != null)
+            Container(
+              margin: const EdgeInsets.only(right: 24),
+              child: CircleAvatar(
+                backgroundColor: Colors.grey,
+                radius: 24,
+                child: ExtendedImage.network(
+                  data.senderAvatar ?? '',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                  shape: BoxShape.circle,
+                  cache: true,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,11 +156,15 @@ class _MessageCard extends StatelessWidget {
                 Text(
                   data.sender ?? '',
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w500),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   data.message,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],

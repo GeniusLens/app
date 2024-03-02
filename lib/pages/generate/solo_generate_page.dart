@@ -196,7 +196,15 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
             ),
             const Spacer(flex: 2),
             GestureDetector(
-              onTap: () => Get.toNamed(AppRouter.generateResultPage),
+              onTap: () async {
+                var result = await GenerateApi.submitTask(
+                  f: function,
+                  lora: List.generate(1, (index) => _loras[_selected]),
+                );
+                if (result) {
+                  Get.offNamed(AppRouter.generateResultPage);
+                }
+              },
               child: Container(
                 height: 48,
                 margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
@@ -211,9 +219,10 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                     ),
                   ],
                 ),
-                child: Center(
-                  child: Text('生成',
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                alignment: Alignment.center,
+                child: const Text(
+                  '生成',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ),

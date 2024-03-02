@@ -17,7 +17,8 @@ class GenerateApi {
   }
 
   static Future<List<CategoryVO>> getSubCategoryList(String category) async {
-    var response = await HttpUtil.get('$_prefix/category/list', queryParameters: {'name': category});
+    var response = await HttpUtil.get('$_prefix/category/list',
+        queryParameters: {'name': category});
     var wrapper = Result.fromJson(response.data);
     List<CategoryVO> list = [];
     for (var item in wrapper.data) {
@@ -27,7 +28,8 @@ class GenerateApi {
   }
 
   static Future<List<FunctionVO>> getFunctionList(String category) async {
-    var response = await HttpUtil.get('$_prefix/function/list', queryParameters: {'category': category});
+    var response = await HttpUtil.get('$_prefix/function/list',
+        queryParameters: {'category': category});
     var wrapper = Result.fromJson(response.data);
     List<FunctionVO> list = [];
     for (var item in wrapper.data) {
@@ -57,12 +59,27 @@ class GenerateApi {
   }
 
   static Future<List<SampleVO>> getSamples(int functionId) async {
-    var response = await HttpUtil.get('$_prefix/function/sample', queryParameters: {'id': functionId});
+    var response = await HttpUtil.get('$_prefix/function/sample',
+        queryParameters: {'id': functionId});
     var wrapper = Result.fromJson(response.data);
     List<SampleVO> list = [];
     for (var item in wrapper.data) {
       list.add(SampleVO.fromJson(item));
     }
     return list;
+  }
+
+  static Future<bool> submitTask({
+    FunctionVO? f,
+    List<LoraVO>? lora,
+    List<String>? images,
+  }) async {
+    var response = await HttpUtil.post('$_prefix/inference', data: {
+      'function': f?.id,
+      'loraIds': lora?.map((e) => "").toList(),
+      'sourceImages': images,
+    });
+    var wrapper = Result.fromJson(response.data);
+    return wrapper.code == "200";
   }
 }

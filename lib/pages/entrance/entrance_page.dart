@@ -56,7 +56,7 @@ class _EntrancePageState extends State<EntrancePage> {
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: _EndText()),
+            // const SliverToBoxAdapter(child: _EndText()),
           ],
         ),
       ),
@@ -244,26 +244,27 @@ class _AIModelsState extends State<_AIModels> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "AI分身",
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 224,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _models.length,
-              itemBuilder: (BuildContext context, int index) {
-                return _AIModelItem(lora: _models[index]);
-              },
-            ),
-          ),
-        ],
-      ),
+      child: (_models.isNotEmpty)
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "AI分身",
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(
+                  height: 224,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _models.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _AIModelItem(lora: _models[index]);
+                    },
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

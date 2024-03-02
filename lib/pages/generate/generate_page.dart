@@ -118,8 +118,19 @@ class _GenerateListState extends State<_GenerateList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: widget.subCategories.length,
+        itemCount: widget.subCategories.length + 1,
         itemBuilder: (context, index) {
+          if (index == widget.subCategories.length) {
+            return Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: const Center(
+                child: Text(
+                  '已经到底部啦',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            );
+          }
           return _GenerateItem(item: widget.subCategories[index]);
         });
   }

@@ -38,15 +38,15 @@ class _ManageModelPageState extends State<ManageModelPage> {
       appBar: AppBar(
         title: const Text('我的AI分身'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
+      body: (_models.isEmpty)
+          ? const _NoModelPage()
+          : Column(
               children: [
-                Positioned.fill(
-                  child: (_models.isEmpty)
-                      ? const Center(child: CircularProgressIndicator())
-                      : Image(
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image(
                           image: ExtendedImage.network(
                             _models[_selectedIndex].avatar,
                             cache: true,
@@ -61,59 +61,118 @@ class _ManageModelPageState extends State<ManageModelPage> {
                           ).image,
                           fit: BoxFit.cover,
                         ),
-                ),
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.1),
+                      ),
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black.withOpacity(0.1),
+                        ),
+                      ),
+                      if (_models.isNotEmpty)
+                        Positioned(
+                          bottom: 16,
+                          left: 16,
+                          right: 16,
+                          child: Center(
+                            child: _InfoCard(model: _models[_selectedIndex]),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 if (_models.isNotEmpty)
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
-                    child: Center(
-                      child: _InfoCard(model: _models[_selectedIndex]),
+                  Container(
+                    height: 172,
+                    padding: const EdgeInsets.all(16),
+                    color: context.theme.cardColor,
+                    child: Column(
+                      children: [
+                        Text(
+                          '${_selectedIndex + 1} / ${_models.length}',
+                          style: TextStyle(
+                            color: context.theme.primaryColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 96,
+                          child: Swiper(
+                            itemCount: _models.length,
+                            scale: 0.8,
+                            viewportFraction: 0.35,
+                            onIndexChanged: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                            },
+                            itemBuilder: (context, index) {
+                              return _ModelItem(
+                                  isCurrent: index == _selectedIndex,
+                                  model: _models[index]);
+                            },
+                          ),
+                        )
+                      ],
                     ),
                   ),
               ],
             ),
+    );
+  }
+}
+
+class _NoModelPage extends StatefulWidget {
+  const _NoModelPage({super.key});
+
+  @override
+  State<_NoModelPage> createState() => _NoModelPageState();
+}
+
+class _NoModelPageState extends State<_NoModelPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      color: context.theme.scaffoldBackgroundColor,
+      child: Column(
+        children: [
+          const Spacer(),
+          // Image.asset('assets/logo.png', width: 128),
+          const SizedBox(height: 16),
+          Text(
+            '您还没有AI分身',
+            style: TextStyle(
+              color: context.theme.primaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          if (_models.isNotEmpty)
-            Container(
-              height: 172,
-              padding: const EdgeInsets.all(16),
-              color: context.theme.cardColor,
-              child: Column(
-                children: [
-                  Text(
-                    '${_selectedIndex + 1} / ${_models.length}',
-                    style: TextStyle(
-                      color: context.theme.primaryColor,
-                      fontSize: 16,
-                    ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () => Get.toNamed(AppRouter.modelCreatePage),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: context.theme.primaryColor,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
                   ),
-                  SizedBox(
-                    height: 96,
-                    child: Swiper(
-                      itemCount: _models.length,
-                      scale: 0.8,
-                      viewportFraction: 0.35,
-                      onIndexChanged: (index) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        return _ModelItem(
-                            isCurrent: index == _selectedIndex,
-                            model: _models[index]);
-                      },
-                    ),
-                  )
                 ],
               ),
+              child: const Text(
+                '创建一个',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
+          ),
+          const Spacer(),
         ],
       ),
     );
