@@ -14,6 +14,7 @@ import 'package:genius_lens/pages/profile/about_page.dart';
 import 'package:genius_lens/pages/profile/follower_list_page.dart';
 import 'package:genius_lens/pages/profile/help_page.dart';
 import 'package:genius_lens/pages/profile/manage_model_page.dart';
+import 'package:genius_lens/pages/profile/manage_task_page.dart';
 import 'package:genius_lens/pages/profile/settings_page.dart';
 import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/detail/detail_page.dart';
@@ -44,6 +45,7 @@ class AppRouter {
   static const String profilePage = '/profile';
   static const String followerListPage = '/follower';
   static const String manageModelPage = '/manage';
+  static const String manageTaskPage = '/manage/task';
   static const String functionPage = '/function';
   static const String detailPage = '/detail';
   static const String settingPage = '/setting';
@@ -62,6 +64,7 @@ class AppRouter {
     soloGeneratePage: () => const SoloGeneratePage(),
     multiGeneratePage: () => const MultiGeneratePage(),
     generateResultPage: () => const GenerateResultPage(),
+    manageTaskPage: () => const ManageTaskPage(),
     favoritePage: () => const FavoritePage(),
     communityPage: () => const CommunityPage(),
     communityDetailPage: () => const CommunityDetailPage(),

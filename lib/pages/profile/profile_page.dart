@@ -1,5 +1,6 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/api/request/user.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/user.dart';
@@ -19,23 +20,23 @@ class _ProfilePageState extends State<ProfilePage> {
     _ActionContext(
       icon: Icons.history,
       title: '我的AI作品',
-      route: AppRouter.profilePage,
+      route: AppRouter.manageTaskPage,
     ),
     _ActionContext(
       icon: Icons.manage_search,
       title: '管理分身',
       route: AppRouter.manageModelPage,
     ),
-    _ActionContext(
-      icon: Icons.favorite,
-      title: '我的点赞',
-      route: AppRouter.profilePage,
-    ),
-    _ActionContext(
-      icon: Icons.star,
-      title: '我的收藏',
-      route: AppRouter.profilePage,
-    ),
+    // _ActionContext(
+    //   icon: Icons.favorite,
+    //   title: '我的点赞',
+    //   route: AppRouter.profilePage,
+    // ),
+    // _ActionContext(
+    //   icon: Icons.star,
+    //   title: '我的收藏',
+    //   route: AppRouter.profilePage,
+    // ),
   ];
 
   final List<_ActionContext> actions2 = [
@@ -74,27 +75,31 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Spacer(),
-                  Container(
-                    margin: const EdgeInsets.only(right: 16, top: 16),
-                    child: GestureDetector(
-                      onTap: () => Get.toNamed(AppRouter.messagePage),
-                      child: const Icon(Icons.notifications_outlined, size: 28),
-                    ),
-                  )
-                ],
-              ),
-              if (user != null) ProfileHeader(user!),
-              const SizedBox(height: 16),
-              if (user != null) ProfilePanel(user!),
-              const SizedBox(height: 16),
-              _ProfileActions(actions: actions1),
-              _ProfileActions(actions: actions2),
-            ],
+          child: RefreshIndicator(
+            onRefresh: () => _loadData(),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      margin: const EdgeInsets.only(right: 16, top: 16),
+                      child: GestureDetector(
+                        onTap: () => Get.toNamed(AppRouter.messagePage),
+                        child:
+                            const Icon(Icons.notifications_outlined, size: 28),
+                      ),
+                    )
+                  ],
+                ),
+                if (user != null) ProfileHeader(user!),
+                const SizedBox(height: 16),
+                if (user != null) ProfilePanel(user!),
+                const SizedBox(height: 16),
+                _ProfileActions(actions: actions1),
+                _ProfileActions(actions: actions2),
+              ],
+            ),
           ),
         ),
       ),
@@ -224,7 +229,9 @@ class ProfileHeader extends StatelessWidget {
             ),
           ),
           Container(
+            margin: const EdgeInsets.only(right: 8),
             child: GestureDetector(
+              onTap: () => EasyLoading.showToast('功能暂未开放'),
               child: const Icon(Icons.chevron_right, size: 32),
             ),
           )

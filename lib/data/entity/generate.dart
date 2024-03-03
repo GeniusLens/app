@@ -88,3 +88,33 @@ class SampleVO {
     return toJson().toString();
   }
 }
+
+@JsonSerializable()
+class TaskVO {
+  final int id;
+  final String taskId;
+  final String? result;
+  final int? status;
+  final int? statusCode;
+  final String function;
+  final String time;
+
+  TaskVO(
+    this.id,
+    this.taskId,
+    this.result,
+    this.status,
+    this.statusCode,
+    this.function,
+    this.time,
+  );
+
+  factory TaskVO.fromJson(Map<String, dynamic> json) => _$TaskVOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TaskVOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +11,15 @@ class GenerateResultPage extends StatefulWidget {
 }
 
 class _GenerateResultPageState extends State<GenerateResultPage> {
+  late final TaskVO _task;
+
+  @override
+  void initState() {
+    super.initState();
+    _task = Get.arguments as TaskVO;
+    print(_task);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +34,8 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
           children: [
             Expanded(
               child: GridView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.8,

@@ -88,4 +88,14 @@ class GenerateApi {
     var wrapper = Result.fromJson(response.data);
     return wrapper.code == "200";
   }
+
+  static Future<List<TaskVO>> getTaskList() async {
+    var response = await HttpUtil.get('$_prefix/inference/list');
+    var wrapper = Result.fromJson(response.data);
+    List<TaskVO> list = [];
+    for (var item in wrapper.data) {
+      list.add(TaskVO.fromJson(item));
+    }
+    return list;
+  }
 }

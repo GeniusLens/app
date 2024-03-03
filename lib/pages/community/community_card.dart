@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
 import 'package:genius_lens/utils/debug_util.dart';
+import 'package:get/get.dart';
 
 class CommunityCard extends StatelessWidget {
   const CommunityCard(this.content, this.onTap, {super.key});
@@ -19,6 +20,7 @@ class CommunityCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(Constants.basicCardBorderRadius),
       ),
+      color: context.theme.cardColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
