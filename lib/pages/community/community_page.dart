@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:genius_lens/api/community.dart';
+import 'package:genius_lens/api/request/community.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
 import 'package:genius_lens/pages/community/community_card.dart';
@@ -31,7 +32,7 @@ class _CommunityPageState extends State<CommunityPage>
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
-  final List<CommunityRecommendEntity> _list = [];
+  final List<CommunityVO> _list = [];
   bool _isLoading = false;
 
   final ScrollController _scrollController = ScrollController();
@@ -48,9 +49,11 @@ class _CommunityPageState extends State<CommunityPage>
     });
     try {
       var list = await CommunityApi().getCommunityRecommendList();
+      debugPrint('item count: ${list.length}');
+      debugPrint(list.toString());
       setState(() => _list.addAll(list));
     } catch (e) {
-      Get.snackbar('加载失败', e.toString());
+      EasyLoading.showError('加载失败');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -148,33 +151,38 @@ class _CommunityPageState extends State<CommunityPage>
           ),
         ],
       ),
-      body: SafeArea(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
         child: Padding(
           padding:
               const EdgeInsets.symmetric(horizontal: Constants.globalPadding),
-          child: RefreshIndicator(
-            onRefresh: _refreshData,
-            child: MasonryGridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 2,
-              crossAxisSpacing: 2,
-              itemCount: _list.length,
-              controller: _scrollController,
-              itemBuilder: (context, index) {
-                var item = _list[index];
-                var height = _basicWidth + 32 * item.cardHeight;
-                return GestureDetector(
-                  onTap: () {
-                    Get.toNamed('/community/detail');
+          child: (_list.isNotEmpty)
+              ? MasonryGridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 2,
+                  itemCount: _list.length,
+                  controller: _scrollController,
+                  itemBuilder: (context, index) {
+                    var item = _list[index];
+                    var height = _basicWidth + 32 * (item.cardHeight ?? 2);
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed('/community/detail');
+                      },
+                      child: SizedBox(
+                        height: height,
+                        child: CommunityCard(item, () => _onLike(index)),
+                      ),
+                    );
                   },
-                  child: SizedBox(
-                    height: height,
-                    child: CommunityCard(item, () => _onLike(index)),
+                )
+              : GestureDetector(
+                  onTap: _refreshData,
+                  child: const Center(
+                    child: Text('暂无数据，点击刷新'),
                   ),
-                );
-              },
-            ),
-          ),
+                ),
         ),
       ),
     );

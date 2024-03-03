@@ -148,9 +148,16 @@ class _LoginPageState extends State<LoginPage> {
               const Spacer(),
               GestureDetector(
                 onTap: () async {
+                  if (!_agree) {
+                    EasyLoading.showInfo('请先同意用户协议和隐私政策');
+                    return;
+                  }
+                  // 显示Loading
+                  EasyLoading.show(status: '登录中...');
                   try {
                     var user = await UserApi.login();
                     context.read<UserProvider>().updateUserInfo(user);
+                    EasyLoading.dismiss();
                     Get.offAllNamed(AppRouter.root);
                   } on WrongPasswordException catch (e) {
                     EasyLoading.showError(e.message);

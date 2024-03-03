@@ -54,7 +54,7 @@ class ErrorInterceptor extends Interceptor {
       case 404:
         ApiState().notify('资源不存在, 请稍后重试');
         break;
-      case 500:
+      case 500 || 502:
         ApiState().notify('服务器错误, 请稍后重试');
         break;
       default:

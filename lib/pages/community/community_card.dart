@@ -9,7 +9,7 @@ import 'package:genius_lens/utils/debug_util.dart';
 class CommunityCard extends StatelessWidget {
   const CommunityCard(this.content, this.onTap, {super.key});
 
-  final CommunityRecommendEntity content;
+  final CommunityVO content;
   final VoidCallback onTap;
 
   @override
@@ -31,7 +31,7 @@ class CommunityCard extends StatelessWidget {
               child: Image(
                 width: double.infinity,
                 image: ExtendedImage.network(
-                  content.coverUrl,
+                  content.images[0],
                   fit: BoxFit.cover,
                 ).image,
                 fit: BoxFit.cover,
@@ -61,13 +61,13 @@ class CommunityCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 12,
                   backgroundImage: ExtendedImage.network(
-                    content.userAvatarUrl,
+                    content.userAvatar ?? '',
                     fit: BoxFit.cover,
                   ).image,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  content.userName,
+                  content.username ?? '无名客',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -93,7 +93,7 @@ class CommunityCard extends StatelessWidget {
                             ),
                       const SizedBox(width: 4),
                       Text(
-                        content.likeCount.toString(),
+                        content.likeCount,
                         style: TextStyle(
                           fontSize: Constants.captionSize - 2,
                           color: Colors.grey[700],
