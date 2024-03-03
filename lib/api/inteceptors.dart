@@ -24,26 +24,25 @@ class VersionInterceptor extends Interceptor {
 
 class ErrorInterceptor extends Interceptor {
   // 现在的时间减去一分钟
-   DateTime _lastRoute = DateTime.now().subtract(const Duration(minutes: 1));
+  DateTime _lastRoute = DateTime.now().subtract(const Duration(minutes: 1));
 
   @override
-  void onError(DioException e, ErrorInterceptorHandler handler) {
-    switch (e.type) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    switch (err.type) {
       case DioExceptionType.badResponse:
-        _handleBadResponse(e);
+        _handleBadResponse(err);
         break;
       default:
-        print('Unknown Error');
     }
-    super.onError(e, handler);
+    super.onError(err, handler);
   }
 
   void _handleBadResponse(DioException e) {
-    print('Bad Response: ${e.message}');
     switch (e.response?.statusCode) {
       case 401:
         ApiState().notify('请先登录');
-        if (DateTime.now().difference(_lastRoute) > const Duration(seconds: 1)) {
+        if (DateTime.now().difference(_lastRoute) >
+            const Duration(seconds: 1)) {
           Get.offAllNamed(AppRouter.login);
           _lastRoute = DateTime.now();
         }

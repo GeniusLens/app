@@ -9,9 +9,7 @@ class ApiState {
 
   factory ApiState() => _instance;
 
-  ApiState._internal() {
-    print('ApiState init');
-  }
+  ApiState._internal();
 
   get isLogin => _token != null;
 
@@ -19,12 +17,9 @@ class ApiState {
 
   get tokenValue => _token;
 
-  void initialize() async {
-    print('ApiState initialize');
-  }
+  void initialize() async {}
 
   void updateToken(String token) {
-    print('ApiState updateToken: $token');
     _token = token;
   }
 

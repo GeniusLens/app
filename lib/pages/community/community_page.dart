@@ -142,7 +142,7 @@ class _CommunityPageState extends State<CommunityPage>
             _buildBarText('热门', 1),
           ],
         ),
-        actions: [
+        actions: const [
           // IconButton(
           //   onPressed: () {},
           //   icon: const Icon(Icons.search),
