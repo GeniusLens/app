@@ -19,7 +19,6 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
 
   Future<void> _loadFunctions() async {
     var list = await GenerateApi.getFunctionList(category.name);
-    print("Loading functions: $list");
     setState(() {
       _functions.clear();
       _functions.addAll(list);
@@ -61,7 +60,7 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
 }
 
 class _ModelItem extends StatelessWidget {
-  const _ModelItem({super.key, required this.function});
+  const _ModelItem({required this.function});
 
   final FunctionVO function;
 

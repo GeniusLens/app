@@ -17,7 +17,7 @@ class _DetailIntroState extends State<DetailIntro> {
         Row(
           children: [
             const SizedBox(width: 8),
-            Expanded(
+            const Expanded(
               child: Text(
                 '数十种模板，创造独一无二的个人专属写真',
                 style: TextStyle(
