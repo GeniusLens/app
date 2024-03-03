@@ -94,7 +94,7 @@ class TaskVO {
   final int id;
   final String taskId;
   final String? result;
-  final int? status;
+  final String? status;
   final int? statusCode;
   final String function;
   final String time;

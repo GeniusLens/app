@@ -197,13 +197,17 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
             const Spacer(flex: 2),
             GestureDetector(
               onTap: () async {
-                var result = await GenerateApi.submitTask(
+                var id = await GenerateApi.submitTask(
                   f: function,
                   lora: List.generate(1, (index) => _loras[_selected]),
+                  images: List.generate(
+                      1,
+                      (index) =>
+                          'https://i0.hdslb.com/bfs/article/cc69633424388f57c12f20c89a33430144224985.jpg'),
                 );
-                if (result) {
-                  Get.offNamed(AppRouter.generateResultPage);
-                }
+                var task = await GenerateApi.getTaskInfo(id);
+                Get.offAndToNamed(AppRouter.generateResultPage,
+                    arguments: task);
               },
               child: Container(
                 height: 48,

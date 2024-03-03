@@ -75,7 +75,7 @@ class GenerateApi {
     return list;
   }
 
-  static Future<bool> submitTask({
+  static Future<int> submitTask({
     FunctionVO? f,
     List<LoraVO>? lora,
     List<String>? images,
@@ -86,7 +86,7 @@ class GenerateApi {
       'sourceImages': images,
     });
     var wrapper = Result.fromJson(response.data);
-    return wrapper.code == "200";
+    return wrapper.data['id'] as int;
   }
 
   static Future<List<TaskVO>> getTaskList() async {
@@ -97,5 +97,11 @@ class GenerateApi {
       list.add(TaskVO.fromJson(item));
     }
     return list;
+  }
+
+  static Future<TaskVO> getTaskInfo(int id) async {
+    var response = await HttpUtil.get('$_prefix/inference/$id');
+    var wrapper = Result.fromJson(response.data);
+    return TaskVO.fromJson(wrapper.data);
   }
 }

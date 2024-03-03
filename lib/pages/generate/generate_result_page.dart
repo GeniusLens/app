@@ -1,3 +1,4 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
@@ -17,7 +18,6 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
   void initState() {
     super.initState();
     _task = Get.arguments as TaskVO;
-    print(_task);
   }
 
   @override
@@ -32,37 +32,30 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
       body: SafeArea(
         child: Column(
           children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Row(children: [
+                Text('您的任务：${_task.status}'),
+              ]),
+            ),
             Expanded(
-              child: GridView.builder(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: 4,
-                itemBuilder: (context, index) => Container(
-                  height: 256 + 64,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      "https://picsum.photos/800/800",
-                      fit: BoxFit.fill,
-                    ),
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: ExtendedImage.network(
+                  _task.result ?? '',
+                  loadStateChanged: (state) {
+                    if (state.extendedImageLoadState == LoadState.loading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (state.extendedImageLoadState == LoadState.failed) {
+                      return const Center(
+                        child: Text('加载失败'),
+                      );
+                    }
+                  },
+                  fit: BoxFit.fill,
                 ),
               ),
             ),
