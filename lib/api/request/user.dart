@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:genius_lens/api/state.dart';
 import 'package:genius_lens/data/entity/result.dart';
 import 'package:genius_lens/data/exception/api_exception.dart';

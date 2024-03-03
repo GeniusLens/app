@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
 import 'package:genius_lens/pages/entrance/entrance_page.dart';
 import 'package:genius_lens/pages/generate/generate_page.dart';
-import 'package:genius_lens/pages/user_model/model_manage_page.dart';
-import 'package:genius_lens/pages/favorite/favorite_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
-import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 
 class IndexPage extends StatefulWidget {
@@ -16,9 +13,6 @@ class IndexPage extends StatefulWidget {
 }
 
 class _IndexPageState extends State<IndexPage> {
-  /// The width of the center space in the [BottomAppBar].
-  static const double _centerWidth = 24;
-
   /// The index into [pages] for the current page.
   int _selectedIndex = 0;
 

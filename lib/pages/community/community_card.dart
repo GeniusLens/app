@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
-import 'package:genius_lens/utils/debug_util.dart';
 import 'package:get/get.dart';
 
 class CommunityCard extends StatelessWidget {

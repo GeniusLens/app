@@ -16,9 +16,7 @@ import 'package:genius_lens/pages/profile/help_page.dart';
 import 'package:genius_lens/pages/profile/manage_model_page.dart';
 import 'package:genius_lens/pages/profile/manage_task_page.dart';
 import 'package:genius_lens/pages/profile/settings_page.dart';
-import 'package:genius_lens/pages/user_model/model_manage_page.dart';
 import 'package:genius_lens/pages/detail/detail_page.dart';
-import 'package:genius_lens/pages/favorite/favorite_page.dart';
 import 'package:genius_lens/pages/function/function_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
 import 'package:get/get.dart';
@@ -65,7 +63,6 @@ class AppRouter {
     multiGeneratePage: () => const MultiGeneratePage(),
     generateResultPage: () => const GenerateResultPage(),
     manageTaskPage: () => const ManageTaskPage(),
-    favoritePage: () => const FavoritePage(),
     communityPage: () => const CommunityPage(),
     communityDetailPage: () => const CommunityDetailPage(),
     profilePage: () => const ProfilePage(),

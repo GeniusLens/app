@@ -57,6 +57,7 @@ class _ManageModelPageState extends State<ManageModelPage> {
                                   child: CircularProgressIndicator(),
                                 );
                               }
+                              return null;
                             },
                           ).image,
                           fit: BoxFit.cover,
@@ -225,7 +226,7 @@ class _InfoCard extends StatelessWidget {
   final LoraVO model;
 
   Color _buildColor() {
-    switch (model.status ?? 0) {
+    switch (model.status) {
       case 0:
         return Colors.green;
       case 1:

@@ -17,8 +17,7 @@ class _GeneratePageState extends State<GeneratePage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final List<CategoryVO> _categories = [];
-  final List<CategoryVO> _subCategories = [];
-  int _selectedIndex = 0;
+  final Map<String, List<CategoryVO>> _subCategories = {};
   bool _isLoading = false;
 
   Future<void> _loadCategory() async {
@@ -28,7 +27,9 @@ class _GeneratePageState extends State<GeneratePage>
     });
     var list = await GenerateApi.getCategoryList();
     _categories.addAll(list);
-    print("Loading category: $list");
+    for (var element in _categories) {
+      _subCategories[element.name] = [];
+    }
 
     setState(() {
       _tabController = TabController(length: _categories.length, vsync: this)
@@ -36,11 +37,8 @@ class _GeneratePageState extends State<GeneratePage>
           // 监听Tab切换
           if (_tabController.indexIsChanging) {
             return;
-          } else {
-            print("Tab index: ${_tabController.index}");
-            print("Tab name: ${_categories[_tabController.index].name}");
-            _loadSubCategory(_categories[_tabController.index].name);
           }
+          _loadSubCategory(_categories[_tabController.index].name);
         });
       _isLoading = false;
     });
@@ -51,15 +49,16 @@ class _GeneratePageState extends State<GeneratePage>
 
   Future<void> _loadSubCategory(String category) async {
     if (_isLoading) return;
+    if (_subCategories[category]!.isNotEmpty) return;
     setState(() {
       _isLoading = true;
     });
 
     var list = await GenerateApi.getSubCategoryList(category);
-    print("Loading sub category: $list");
     setState(() {
-      _subCategories.clear();
-      _subCategories.addAll(list);
+      if (list.isNotEmpty) {
+        _subCategories[category] = list;
+      }
       _isLoading = false;
     });
   }
@@ -97,7 +96,11 @@ class _GeneratePageState extends State<GeneratePage>
         child: TabBarView(
           controller: _tabController,
           children: _categories
-              .map((e) => _GenerateList(subCategories: _subCategories))
+              .map(
+                (e) => _GenerateList(
+                    subCategories: _subCategories[e.name] ?? [],
+                    key: ValueKey(e.name)),
+              )
               .toList(),
         ),
       ),
@@ -114,9 +117,14 @@ class _GenerateList extends StatefulWidget {
   State<_GenerateList> createState() => _GenerateListState();
 }
 
-class _GenerateListState extends State<_GenerateList> {
+class _GenerateListState extends State<_GenerateList>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView.builder(
         itemCount: widget.subCategories.length + 1,
         itemBuilder: (context, index) {
@@ -131,7 +139,10 @@ class _GenerateListState extends State<_GenerateList> {
               ),
             );
           }
-          return _GenerateItem(item: widget.subCategories[index]);
+          return _GenerateItem(
+            item: widget.subCategories[index],
+            key: ValueKey(widget.subCategories[index].name),
+          );
         });
   }
 }
@@ -172,7 +183,8 @@ class _GenerateItem extends StatelessWidget {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    } else if (state.extendedImageLoadState == LoadState.failed) {
+                    } else if (state.extendedImageLoadState ==
+                        LoadState.failed) {
                       return const Center(
                         child: Icon(Icons.error),
                       );

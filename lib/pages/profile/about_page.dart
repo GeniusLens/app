@@ -2,7 +2,6 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:genius_lens/utils/package_util.dart';
 import 'package:get/get.dart';
-import 'package:package_info/package_info.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -48,7 +47,7 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'v${PackageUtil().version}' ?? '',
+              'v${PackageUtil().version}',
               style: TextStyle(
                 fontSize: 16,
                 color: context.theme.primaryColor.withOpacity(0.6),

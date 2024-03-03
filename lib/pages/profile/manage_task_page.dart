@@ -125,6 +125,7 @@ class _TaskItem extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     );
                   }
+                  return null;
                 },
                 width: double.infinity,
                 fit: BoxFit.cover,

@@ -16,7 +16,6 @@ class EntrancePage extends StatefulWidget {
 class _EntrancePageState extends State<EntrancePage> {
   final List<String> _labels = ["热门", "最新", "推荐"];
   final List<FunctionVO> _functions = [];
-  int _selectedIndex = 0;
 
   Future<void> _loadFunctions() async {
     var list = await GenerateApi.getRecommendFunction("all");
@@ -65,7 +64,7 @@ class _EntrancePageState extends State<EntrancePage> {
 }
 
 class _Header extends StatefulWidget {
-  const _Header({super.key});
+  const _Header();
 
   @override
   State<_Header> createState() => _HeaderState();
@@ -140,7 +139,7 @@ class _HeaderState extends State<_Header> {
 }
 
 class _Functions extends StatefulWidget {
-  const _Functions({super.key});
+  const _Functions();
 
   @override
   State<_Functions> createState() => _FunctionsState();
@@ -155,13 +154,17 @@ class _FunctionsState extends State<_Functions> {
         children: [
           // const Expanded(child: _CategoryItem(label: "所有功能")),
           Expanded(
-            child: _CategoryItem(icon: Icons.camera_alt_outlined),
+            child: _CategoryItem(
+                icon: Icons.camera_alt_outlined, key: ValueKey("photo")),
           ),
           Expanded(
-            child: _CategoryItem(icon: Icons.video_camera_front_outlined),
+            child: _CategoryItem(
+                icon: Icons.video_camera_front_outlined,
+                key: ValueKey("video")),
           ),
           Expanded(
-            child: _CategoryItem(icon: Icons.music_note_outlined),
+            child: _CategoryItem(
+                icon: Icons.music_note_outlined, key: ValueKey("music")),
           ),
         ],
       ),
@@ -218,7 +221,7 @@ class _CategoryItem extends StatelessWidget {
 }
 
 class _AIModels extends StatefulWidget {
-  const _AIModels({super.key});
+  const _AIModels();
 
   @override
   State<_AIModels> createState() => _AIModelsState();
@@ -270,7 +273,7 @@ class _AIModelsState extends State<_AIModels> {
 }
 
 class _AIModelItem extends StatelessWidget {
-  const _AIModelItem({super.key, required this.lora});
+  const _AIModelItem({required this.lora});
 
   final LoraVO lora;
 
@@ -346,7 +349,7 @@ class _AIModelItem extends StatelessWidget {
 }
 
 class _TemplatesHeader extends StatefulWidget {
-  const _TemplatesHeader({super.key, required this.labels});
+  const _TemplatesHeader({required this.labels});
 
   final List<String> labels;
 
@@ -396,7 +399,7 @@ class _TemplatesHeaderState extends State<_TemplatesHeader> {
 }
 
 class _TemplateItem extends StatelessWidget {
-  const _TemplateItem({super.key, required this.function});
+  const _TemplateItem({required this.function});
 
   final FunctionVO function;
 
@@ -457,7 +460,7 @@ class _TemplateItem extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: Text(
             function.name!,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -469,18 +472,18 @@ class _TemplateItem extends StatelessWidget {
   }
 }
 
-class _EndText extends StatelessWidget {
-  const _EndText({super.key});
+// class _EndText extends StatelessWidget {
+//   const _EndText();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      alignment: Alignment.center,
-      child: Text(
-        "—— The End ——",
-        style: TextStyle(color: Colors.grey[600]),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 64,
+//       alignment: Alignment.center,
+//       child: Text(
+//         "—— The End ——",
+//         style: TextStyle(color: Colors.grey[600]),
+//       ),
+//     );
+//   }
+// }

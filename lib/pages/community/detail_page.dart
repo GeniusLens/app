@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -226,7 +224,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
             ),
           ),
           SliverList.builder(itemBuilder: (context, index) {
-            return _CommentCard();
+            return const _CommentCard();
           }),
         ],
       ),
@@ -235,13 +233,13 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 }
 
 class _CommentCard extends StatelessWidget {
-  const _CommentCard({super.key});
+  const _CommentCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: context.theme.cardColor,
         boxShadow: [

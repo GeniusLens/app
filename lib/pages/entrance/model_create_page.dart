@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +34,6 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
 
   Future<void> _loadSamples() async {
     var result = await GenerateApi.getSamples(0);
-    print(result);
     setState(() {
       _samples.addAll(result);
     });
@@ -117,6 +115,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
         onPageChanged: (index) => setState(() => _selectedIndex = index),
         children: [
           _BasePage(
+            key: const Key('front'),
             content: Column(
               children: [
                 const Spacer(),
@@ -198,6 +197,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                 .toList(),
           ),
           _BasePage(
+            key: const Key('other'),
             content: Container(
               padding: const EdgeInsets.all(16),
               child: GridView.builder(
@@ -291,8 +291,11 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                               Container(
                                 margin: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 4),
-                                child: Icon(Icons.circle,
-                                    size: 8, color: Colors.green),
+                                child: const Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: Colors.green,
+                                ),
                               ),
                               Text(
                                 ' 正面',

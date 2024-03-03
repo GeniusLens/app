@@ -37,7 +37,7 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(category.name ?? ''),
+        title: Text(category.name),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -124,10 +124,12 @@ class _ModelItem extends StatelessWidget {
                   onTap: () {
                     switch (function.type) {
                       case 'solo':
-                        Get.toNamed(AppRouter.soloGeneratePage, arguments: function);
+                        Get.toNamed(AppRouter.soloGeneratePage,
+                            arguments: function);
                         break;
                       case 'multi':
-                        Get.toNamed(AppRouter.multiGeneratePage, arguments: function);
+                        Get.toNamed(AppRouter.multiGeneratePage,
+                            arguments: function);
                         break;
                       default:
                         Get.snackbar('错误', '未知的模型类型');
