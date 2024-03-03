@@ -9,7 +9,8 @@ class CommunityVO {
   final String title;
   final String content;
   final List<String> images;
-  final FunctionVO? function;
+  FunctionVO? function;
+  final int? functionId;
   final String time;
   final String? userAvatar;
   final String? username;
@@ -29,6 +30,7 @@ class CommunityVO {
     required this.content,
     required this.images,
     required this.function,
+    required this.functionId,
     required this.time,
     required this.userAvatar,
     required this.username,

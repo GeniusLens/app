@@ -145,10 +145,10 @@ class _CommunityPageState extends State<CommunityPage>
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.search),
+          // ),
         ],
       ),
       body: RefreshIndicator(
@@ -168,7 +168,7 @@ class _CommunityPageState extends State<CommunityPage>
                     var height = _basicWidth + 32 * (item.cardHeight ?? 2);
                     return GestureDetector(
                       onTap: () {
-                        Get.toNamed('/community/detail');
+                        Get.toNamed('/community/detail', arguments: item);
                       },
                       child: SizedBox(
                         height: height,

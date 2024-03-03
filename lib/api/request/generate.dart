@@ -38,6 +38,12 @@ class GenerateApi {
     return list;
   }
 
+  static Future<FunctionVO> getFunction(int id) async {
+    var response = await HttpUtil.get('$_prefix/function/$id');
+    var wrapper = Result.fromJson(response.data);
+    return FunctionVO.fromJson(wrapper.data);
+  }
+
   static Future<List<FunctionVO>> getRecommendFunction(String type) async {
     var response = await HttpUtil.get('$_prefix/function/recommend');
     var wrapper = Result.fromJson(response.data);
