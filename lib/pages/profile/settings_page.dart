@@ -7,11 +7,11 @@ class _Context {
   final String route;
   final bool showMore;
 
-  const _Context({
+  const _Context(
+    this.showMore, {
     required this.icon,
     required this.title,
     required this.route,
-    this.showMore = false,
   });
 }
 
@@ -25,11 +25,13 @@ class SettingPage extends StatefulWidget {
 class _SettingPageState extends State<SettingPage> {
   final List<_Context> _contexts = [
     const _Context(
+      true,
       icon: Icons.lock,
       title: '账号与安全',
       route: '/setting/account',
     ),
     const _Context(
+      true,
       icon: Icons.notifications,
       title: '消息通知',
       route: '/setting/notification',
@@ -48,6 +50,7 @@ class _SettingPageState extends State<SettingPage> {
             _CardWrapper(contexts: _contexts),
             const _CardWrapper(contexts: [
               _Context(
+                false,
                 icon: Icons.help,
                 title: '退出登录',
                 route: '/setting/logout',
@@ -61,7 +64,7 @@ class _SettingPageState extends State<SettingPage> {
 }
 
 class _CardWrapper extends StatelessWidget {
-  const _CardWrapper({super.key, required this.contexts});
+  const _CardWrapper({required this.contexts});
 
   final List<_Context> contexts;
 
@@ -91,7 +94,7 @@ class _CardWrapper extends StatelessWidget {
 }
 
 class _CardItem extends StatelessWidget {
-  const _CardItem({super.key, required this.data});
+  const _CardItem({required this.data});
 
   final _Context data;
 

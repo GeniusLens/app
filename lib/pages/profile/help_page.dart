@@ -74,7 +74,7 @@ class _HelpPageState extends State<HelpPage> {
 }
 
 class _HelpItem extends StatelessWidget {
-  const _HelpItem({super.key, required this.title, required this.content});
+  const _HelpItem({required this.title, required this.content});
 
   final String title;
   final String content;

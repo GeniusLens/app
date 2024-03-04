@@ -3,9 +3,7 @@ import 'package:genius_lens/pages/community/community_page.dart';
 import 'package:genius_lens/pages/entrance/entrance_page.dart';
 import 'package:genius_lens/pages/generate/generate_page.dart';
 import 'package:genius_lens/pages/profile/profile_page.dart';
-import 'package:genius_lens/utils/permission_util.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});

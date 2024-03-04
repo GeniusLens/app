@@ -61,7 +61,7 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
 }
 
 class _TaskItem extends StatelessWidget {
-  const _TaskItem({super.key, required this.task});
+  const _TaskItem({required this.task});
 
   final TaskVO task;
 

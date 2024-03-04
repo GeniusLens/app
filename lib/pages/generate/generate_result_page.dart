@@ -34,7 +34,7 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              child: LinearProgressIndicator(
+              child: const LinearProgressIndicator(
                 color: Colors.blue,
               ),
             ),
@@ -59,6 +59,7 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
                                 child: Text('加载失败'),
                               );
                             }
+                            return null;
                           },
                           fit: BoxFit.fill,
                         ),

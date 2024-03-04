@@ -18,11 +18,13 @@ class _ProfilePageState extends State<ProfilePage> {
   UserVO? user;
   final List<_ActionContext> actions1 = [
     _ActionContext(
+      true,
       icon: Icons.history,
       title: '我的AI作品',
       route: AppRouter.manageTaskPage,
     ),
     _ActionContext(
+      true,
       icon: Icons.manage_search,
       title: '管理分身',
       route: AppRouter.manageModelPage,
@@ -41,16 +43,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final List<_ActionContext> actions2 = [
     _ActionContext(
+      true,
       icon: Icons.settings,
       title: '设置',
       route: AppRouter.settingPage,
     ),
     _ActionContext(
+      false,
       icon: Icons.help,
       title: '帮助与反馈',
       route: AppRouter.helpPage,
     ),
     _ActionContext(
+      false,
       icon: Icons.info,
       title: '关于我们',
       route: AppRouter.aboutPage,
@@ -108,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 class _ProfileActions extends StatefulWidget {
-  const _ProfileActions({super.key, required this.actions});
+  const _ProfileActions({required this.actions});
 
   final List<_ActionContext> actions;
 
@@ -143,7 +148,7 @@ class _ProfileActionsState extends State<_ProfileActions> {
 }
 
 class _ProfileActionItem extends StatelessWidget {
-  const _ProfileActionItem({super.key, required this.data});
+  const _ProfileActionItem({required this.data});
 
   final _ActionContext data;
 
@@ -168,10 +173,10 @@ class _ActionContext {
   final bool showTrailing;
   final String route;
 
-  _ActionContext({
+  _ActionContext(
+    this.showTrailing, {
     this.icon,
     required this.title,
-    this.showTrailing = true,
     required this.route,
   });
 }
@@ -251,7 +256,7 @@ class ProfilePanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 72,
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           PanelItem(title: '作品', value: '11', route: AppRouter.profilePage),

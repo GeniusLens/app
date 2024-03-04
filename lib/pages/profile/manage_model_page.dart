@@ -122,7 +122,7 @@ class _ManageModelPageState extends State<ManageModelPage> {
 }
 
 class _NoModelPage extends StatefulWidget {
-  const _NoModelPage({super.key});
+  const _NoModelPage();
 
   @override
   State<_NoModelPage> createState() => _NoModelPageState();
@@ -181,7 +181,7 @@ class _NoModelPageState extends State<_NoModelPage> {
 }
 
 class _ModelItem extends StatelessWidget {
-  const _ModelItem({super.key, required this.isCurrent, required this.model});
+  const _ModelItem({required this.isCurrent, required this.model});
 
   final bool isCurrent;
   final LoraVO model;
@@ -221,7 +221,7 @@ class _ModelItem extends StatelessWidget {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({super.key, required this.model});
+  const _InfoCard({required this.model});
 
   final LoraVO model;
 

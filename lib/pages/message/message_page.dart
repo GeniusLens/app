@@ -110,7 +110,7 @@ class _MessagePageState extends State<MessagePage>
 }
 
 class _MessageCard extends StatelessWidget {
-  const _MessageCard({super.key, required this.data});
+  const _MessageCard({required this.data});
 
   final MessageVO data;
 
@@ -174,7 +174,7 @@ class _MessageCard extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               data.time,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           )
         ],

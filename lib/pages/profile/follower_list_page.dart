@@ -34,7 +34,7 @@ class _FollowerListPageState extends State<FollowerListPage> {
 }
 
 class _FollowerItem extends StatelessWidget {
-  const _FollowerItem({super.key});
+  const _FollowerItem();
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +49,12 @@ class _FollowerItem extends StatelessWidget {
             child: const Icon(Icons.person, color: Colors.white),
           ),
           const SizedBox(width: 16),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text('用户名', style: TextStyle(fontSize: 16)),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text('简介'),
               ],
             ),

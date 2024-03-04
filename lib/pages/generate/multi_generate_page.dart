@@ -49,7 +49,7 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
                     ),
                   ],
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('生成',
                       style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
@@ -63,7 +63,7 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
 }
 
 class _MultiGenerateItem extends StatelessWidget {
-  const _MultiGenerateItem({super.key});
+  const _MultiGenerateItem();
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +78,12 @@ class _MultiGenerateItem extends StatelessWidget {
               fit: BoxFit.fill,
             ).image,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 Text('分身名称', style: TextStyle(fontSize: 16)),
-                const Spacer(),
+                Spacer(),
                 Checkbox(value: false, onChanged: null),
               ],
             ),
