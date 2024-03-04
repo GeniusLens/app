@@ -1,5 +1,6 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -84,10 +85,12 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                 // 监听左右滑动
                 onHorizontalDragUpdate: (details) {
                   // 滑动距离小于阈值不触发
-                  if (details.primaryDelta!.abs() < 4) return;
+                  if (details.primaryDelta!.abs() < 3) return;
                   // 时间间隔小于阈值不触发
-                  if (DateTime.now().difference(_lastTime).inMilliseconds < 300)
+                  if (DateTime.now().difference(_lastTime).inMilliseconds <
+                      200) {
                     return;
+                  }
                   if (details.primaryDelta! > 0) {
                     if (_index > 0) {
                       setState(() => _index--);
@@ -197,6 +200,10 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
             const Spacer(flex: 2),
             GestureDetector(
               onTap: () async {
+                if (_selected == -1) {
+                  EasyLoading.showToast('请选择一个Lora模型');
+                  return;
+                }
                 var id = await GenerateApi.submitTask(
                   f: function,
                   lora: List.generate(1, (index) => _loras[_selected]),

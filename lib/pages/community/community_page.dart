@@ -45,16 +45,10 @@ class _CommunityPageState extends State<CommunityPage>
     setState(() {
       _isLoading = true;
     });
-    try {
-      var list = await CommunityApi().getCommunityRecommendList();
-      debugPrint('item count: ${list.length}');
-      debugPrint(list.toString());
-      setState(() => _list.addAll(list));
-    } catch (e) {
-      EasyLoading.showError('加载失败');
-    } finally {
-      setState(() => _isLoading = false);
-    }
+    var list = await CommunityApi().getCommunityRecommendList();
+    debugPrint('item count: ${list.length}');
+    debugPrint(list.toString());
+    setState(() => _list.addAll(list));
   }
 
   Future<void> _refreshData() async {

@@ -21,6 +21,7 @@ void main() async {
   }
   runApp(const MyApp());
   await PackageUtil().initialize();
+  EasyLoading.instance.loadingStyle = EasyLoadingStyle.light;
 }
 
 class MyApp extends StatelessWidget {
