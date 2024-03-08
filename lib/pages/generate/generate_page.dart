@@ -223,10 +223,10 @@ class _GenerateItem extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.name, style: const TextStyle(fontSize: 18)),
+                        Text(item.name, style: const TextStyle(fontSize: 16)),
                         Text(
                           "${item.description}",
-                          style: const TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ],
                     ),

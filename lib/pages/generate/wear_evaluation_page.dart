@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/data/entity/generate.dart';
-import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 

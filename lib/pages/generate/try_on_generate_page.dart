@@ -49,7 +49,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
         actions: [
           GestureDetector(
             onTap: () async {
-              var result = GenerateApi.submitTask();
+              GenerateApi.submitTask();
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

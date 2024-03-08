@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +7,6 @@ import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
@@ -27,7 +24,6 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
   int _selectedIndex = -1;
   String? _videoUrl;
   bool _uploading = false;
-  File? _video;
 
   Future<void> _fetchLoraList() async {
     var list = await GenerateApi.getUserLoraList();
@@ -172,7 +168,6 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _video = null;
                     _videoUrl = null;
                     _controller!.dispose();
                     _controller = null;
@@ -184,11 +179,11 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
               GestureDetector(
                 onTap: () async {
                   if (_selectedIndex == -1) {
-                    Get.snackbar('提示', '请选择分身');
+                    EasyLoading.showError('请选择分身');
                     return;
                   }
-
-                  Get.toNamed(AppRouter.manageTaskPage);
+                  GenerateApi.submitTask();
+                  Get.offAndToNamed(AppRouter.manageTaskPage);
                 },
                 child: Container(
                   padding:
