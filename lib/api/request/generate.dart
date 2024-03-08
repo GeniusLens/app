@@ -81,6 +81,7 @@ class GenerateApi {
     List<LoraVO>? lora,
     List<String>? images,
     String? sceneId,
+    int? clothId,
   }) async {
     var response = await HttpUtil.post('$_prefix/inference', data: {
       'taskType': type ?? 1,
@@ -88,6 +89,7 @@ class GenerateApi {
       'loraIds': lora?.map((e) => "").toList(),
       'sourceImages': images,
       'sceneId': sceneId,
+      'clothId': clothId,
     });
     var wrapper = Result.fromJson(response.data);
     return wrapper.data['id'] as int;
