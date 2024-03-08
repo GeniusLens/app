@@ -122,6 +122,19 @@ class _GenerateListState extends State<_GenerateList>
   @override
   bool get wantKeepAlive => true;
 
+  String? _buildRoute(CategoryVO item) {
+    if (item.name == "动态写真") {
+      return AppRouter.videoGeneratePage;
+    }
+    if (item.name == "换装") {
+      return AppRouter.tryOnGeneratePage;
+    }
+    if (item.name == "穿搭建议") {
+      return AppRouter.wearEvaluatePage;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -141,6 +154,7 @@ class _GenerateListState extends State<_GenerateList>
           }
           return _GenerateItem(
             item: widget.subCategories[index],
+            route: _buildRoute(widget.subCategories[index]),
             key: ValueKey(widget.subCategories[index].name),
           );
         });
@@ -148,9 +162,10 @@ class _GenerateListState extends State<_GenerateList>
 }
 
 class _GenerateItem extends StatelessWidget {
-  const _GenerateItem({super.key, required this.item});
+  const _GenerateItem({super.key, required this.item, this.route});
 
   final CategoryVO item;
+  final String? route;
 
   @override
   Widget build(BuildContext context) {
@@ -218,8 +233,10 @@ class _GenerateItem extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () =>
-                      Get.toNamed(AppRouter.selectModelPage, arguments: item),
+                  onTap: () => Get.toNamed(
+                    route ?? AppRouter.selectModelPage,
+                    arguments: item,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(

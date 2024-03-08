@@ -227,11 +227,13 @@ class _InfoCard extends StatelessWidget {
 
   Color _buildColor() {
     switch (model.status) {
-      case 0:
-        return Colors.green;
       case 1:
         return Colors.orange;
-      case -1:
+      case 2:
+        return Colors.blue;
+      case 3:
+        return Colors.green;
+      case 4:
         return Colors.red;
       default:
         return Colors.grey;
@@ -261,12 +263,18 @@ class _InfoCard extends StatelessWidget {
             children: [
               Icon(Icons.circle, color: _buildColor(), size: 16),
               const SizedBox(width: 4),
-              Text(model.name ?? '',
+              Expanded(
+                child: Text(
+                  model.name ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 24,
-                      color: context.theme.primaryColor,
-                      fontWeight: FontWeight.bold)),
-              const Spacer(),
+                    fontSize: 24,
+                    color: context.theme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               // 画一个圆形的按钮
               Container(
                 width: 48,

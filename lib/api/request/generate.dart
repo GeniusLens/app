@@ -75,15 +75,19 @@ class GenerateApi {
     return list;
   }
 
-  static Future<int> submitTask({
+  static Future<int?> submitTask({
+    int? type,
     FunctionVO? f,
     List<LoraVO>? lora,
     List<String>? images,
+    String? sceneId,
   }) async {
     var response = await HttpUtil.post('$_prefix/inference', data: {
+      'taskType': type ?? 1,
       'function': f?.id,
       'loraIds': lora?.map((e) => "").toList(),
       'sourceImages': images,
+      'sceneId': sceneId,
     });
     var wrapper = Result.fromJson(response.data);
     return wrapper.data['id'] as int;

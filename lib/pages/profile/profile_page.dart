@@ -155,6 +155,7 @@ class _ProfileActionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      // titleTextStyle: const TextStyle(fontSize: 16),
       leading: (data.icon != null)
           ? Icon(data.icon, color: context.theme.primaryColor)
           : null,
@@ -187,12 +188,12 @@ class ProfileHeader extends StatelessWidget {
   final UserVO user;
 
   final TextStyle _nameStyle = const TextStyle(
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
   );
 
   final TextStyle _signatureStyle = const TextStyle(
-    fontSize: 16,
+    fontSize: 14,
   );
 
   @override
@@ -204,7 +205,7 @@ class ProfileHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            radius: 48,
+            radius: 32,
             backgroundImage: ExtendedImage.network(
               user.avatar ?? '',
               cache: true,

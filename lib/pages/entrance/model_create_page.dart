@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
@@ -26,9 +27,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
   int _selectedIndex = 0;
 
   final ImagePicker _imagePicker = ImagePicker();
-  XFile? _frontImage;
+  String? _frontImageUrl;
   bool _isOtherLoading = false;
-  final List<XFile> _otherImages = [];
+  final List<String> _otherImageUrls = [];
 
   final List<SampleVO> _samples = [];
 
@@ -97,15 +98,28 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
           ),
         ),
       ),
-      floatingActionButton: (_selectedIndex == 1)
+      floatingActionButton: (_selectedIndex == 1 &&
+              _otherImageUrls.isNotEmpty &&
+              _frontImageUrl != null)
           ? FloatingActionButton(
               shape: const CircleBorder(),
               onPressed: () async {
-                Get.snackbar('创建成功', '请前往我的分身查看',
-                    snackPosition: SnackPosition.BOTTOM);
-                Future.delayed(const Duration(milliseconds: 1000), () {
-                  Get.toNamed(AppRouter.manageModelPage);
-                });
+                print(
+                    'submit, front: $_frontImageUrl, other: $_otherImageUrls');
+                // EasyLoading.show(status: '正在生成');
+                var result = await GenerateApi.submitTask(
+                  type: 2,
+                  images: [
+                    _frontImageUrl!,
+                    ..._otherImageUrls.map((e) => e).toList(),
+                  ],
+                );
+                if (result == null) {
+                  EasyLoading.dismiss();
+                  EasyLoading.showError('生成失败');
+                  return;
+                }
+                Get.offAndToNamed(AppRouter.manageModelPage);
               },
               child: const Icon(Icons.check),
             )
@@ -125,19 +139,13 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                       source: ImageSource.gallery,
                     );
                     if (file != null) {
-                      setState(() {
-                        _frontImage = file;
-                      });
-                      var result = await CommonAPi.uploadImage(file.path);
-                      if (!result) {
+                      var result = await CommonAPi.uploadFile(file.path);
+                      if (result == null) {
                         Get.snackbar('上传失败', '请检查网络连接或稍后重试',
                             snackPosition: SnackPosition.BOTTOM);
                       }
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
+                      setState(() {
+                        _frontImageUrl = result;
                       });
                     }
                   },
@@ -147,17 +155,17 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     child: Container(
                       margin: const EdgeInsets.all(16),
                       // 减去AppBar高度
-                      height: (_frontImage == null)
+                      height: (_frontImageUrl == null)
                           ? 196
                           : Get.height -
                               MediaQuery.of(context).padding.top -
                               kToolbarHeight -
                               256 -
                               64,
-                      width: (_frontImage == null) ? 196 : null,
+                      width: (_frontImageUrl == null) ? 196 : null,
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(32),
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -166,12 +174,24 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                           ),
                         ],
                       ),
-                      child: (_frontImage != null)
+                      child: (_frontImageUrl != null)
                           ? ClipRRect(
-                              borderRadius: BorderRadius.circular(32),
-                              child: Image.file(
-                                File(_frontImage!.path),
-                                fit: BoxFit.fitHeight,
+                              borderRadius: BorderRadius.circular(16),
+                              child: ExtendedImage.network(
+                                _frontImageUrl!,
+                                cache: true,
+                                loadStateChanged: (state) {
+                                  if (state.extendedImageLoadState ==
+                                      LoadState.loading) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return ExtendedRawImage(
+                                      image: state.extendedImageInfo?.image,
+                                      fit: BoxFit.cover);
+                                },
+                                fit: BoxFit.cover,
                               ),
                             )
                           : Center(
@@ -206,11 +226,11 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                 ),
-                itemCount: _otherImages.length + 1,
+                itemCount: _otherImageUrls.length + 1,
                 itemBuilder: (context, index) {
-                  var content = index < _otherImages.length
-                      ? Image.file(
-                          File(_otherImages[index].path),
+                  var content = index < _otherImageUrls.length
+                      ? Image.network(
+                          _otherImageUrls[index],
                           fit: BoxFit.fill,
                         )
                       : Container(
@@ -231,7 +251,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         );
                   return GestureDetector(
                     onTap: () async {
-                      if (index < _otherImages.length) {
+                      if (index < _otherImageUrls.length) {
                         // 弹窗询问是否删除
                         bool? result = await Get.dialog<bool>(
                           AlertDialog(
@@ -251,7 +271,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         );
                         if (result == true) {
                           setState(() {
-                            _otherImages.removeAt(index);
+                            _otherImageUrls.removeAt(index);
                           });
                         }
                         return;
@@ -264,14 +284,14 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         setState(() {
                           _isOtherLoading = true;
                         });
-                        var result = await CommonAPi.uploadImage(file.path);
-                        if (!result) {
+                        var result = await CommonAPi.uploadFile(file.path);
+                        if (result == null) {
                           Get.snackbar('上传失败', '请检查网络连接或稍后重试',
                               snackPosition: SnackPosition.BOTTOM);
                           return;
                         }
                         setState(() {
-                          _otherImages.add(file);
+                          _otherImageUrls.add(result);
                           _isOtherLoading = false;
                         });
                       }
@@ -285,7 +305,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        if (index < _otherImages.length)
+                        if (index < _otherImageUrls.length)
                           Row(
                             children: [
                               Container(
@@ -298,7 +318,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                                 ),
                               ),
                               Text(
-                                ' 正面',
+                                '已上传',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[800],

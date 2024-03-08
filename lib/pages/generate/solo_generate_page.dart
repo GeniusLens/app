@@ -212,9 +212,14 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                       (index) =>
                           'https://i0.hdslb.com/bfs/article/cc69633424388f57c12f20c89a33430144224985.jpg'),
                 );
+                print('id: $id');
+                if (id == null) {
+                  EasyLoading.showToast('生成失败');
+                  return;
+                }
                 var task = await GenerateApi.getTaskInfo(id);
-                Get.offAndToNamed(AppRouter.generateResultPage,
-                    arguments: task);
+                print('task: $task');
+                Get.offAndToNamed(AppRouter.manageTaskPage, arguments: task);
               },
               child: Container(
                 height: 48,

@@ -7,6 +7,9 @@ import 'package:genius_lens/pages/generate/generate_result_page.dart';
 import 'package:genius_lens/pages/generate/model_select_page.dart';
 import 'package:genius_lens/pages/generate/multi_generate_page.dart';
 import 'package:genius_lens/pages/generate/solo_generate_page.dart';
+import 'package:genius_lens/pages/generate/try_on_generate_page.dart';
+import 'package:genius_lens/pages/generate/video_generate_page.dart';
+import 'package:genius_lens/pages/generate/wear_evaluation_page.dart';
 import 'package:genius_lens/pages/index.dart';
 import 'package:genius_lens/pages/login/login_page.dart';
 import 'package:genius_lens/pages/message/message_page.dart';
@@ -34,6 +37,9 @@ class AppRouter {
 
   static const String soloGeneratePage = '/generate/solo';
   static const String multiGeneratePage = '/generate/multi';
+  static const String videoGeneratePage = '/generate/video';
+  static const String wearEvaluatePage = '/generate/wear';
+  static const String tryOnGeneratePage = '/generate/tryon';
   static const String generateResultPage = '/generate/result';
 
   static const String favoritePage = '/favorite';
@@ -61,6 +67,9 @@ class AppRouter {
     selectModelPage: () => const ModelSelectPage(),
     soloGeneratePage: () => const SoloGeneratePage(),
     multiGeneratePage: () => const MultiGeneratePage(),
+    videoGeneratePage: () => const VideoGeneratePage(),
+    wearEvaluatePage: () => const WearEvaluationPage(),
+    tryOnGeneratePage: () => const TryOnGeneratePage(),
     generateResultPage: () => const GenerateResultPage(),
     manageTaskPage: () => const ManageTaskPage(),
     communityPage: () => const CommunityPage(),

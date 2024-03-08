@@ -106,7 +106,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   pagination: SwiperPagination(
                     builder: DotSwiperPaginationBuilder(
                       color: Colors.grey[300],
-                      activeColor: Colors.grey[800],
+                      activeColor: context.theme.primaryColor,
                       size: 8,
                       activeSize: 8,
                     ),
@@ -119,10 +119,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 _content?.title ?? '标题',
-                style: TextStyle(
-                  fontSize: Constants.titleSize,
-                  color: Colors.grey[800],
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.grey[800]),
               ),
             ),
           ),
@@ -131,10 +128,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 _content?.content ?? '内容',
-                style: TextStyle(
-                  fontSize: Constants.subtitleSize,
-                  color: Colors.grey[800],
-                ),
+                style: TextStyle(color: Colors.grey[800]),
               ),
             ),
           ),
@@ -163,15 +157,16 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                         Text(
                           '同款模板',
                           style: TextStyle(
-                            fontSize: Constants.bodySize,
-                            color: Colors.grey[800],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: context.theme.primaryColor,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _content?.function?.name ?? '功能名称',
                           style: TextStyle(
-                            fontSize: Constants.subtitleSize,
+                            fontSize: 16,
                             color: Colors.grey[800],
                           ),
                         ),
