@@ -175,10 +175,13 @@ class _TaskItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        LoadingAnimationWidget.staggeredDotsWave(
-                          color: context.theme.primaryColor,
-                          size: 24,
-                        ),
+                        if (task.statusCode == 1 || task.statusCode == 2)
+                          LoadingAnimationWidget.staggeredDotsWave(
+                            color: context.theme.primaryColor,
+                            size: 24,
+                          ),
+                        if (task.statusCode == 4)
+                          const Icon(Icons.error, size: 32, color: Colors.red),
                         const SizedBox(height: 8),
                         Text(_getStatus()),
                       ],
