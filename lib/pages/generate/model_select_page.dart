@@ -1,7 +1,10 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../api/request/generate.dart';
 import '../../data/entity/generate.dart';
@@ -43,17 +46,34 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: GridView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: _functions.length,
-          itemBuilder: (context, index) =>
-              _ModelItem(function: _functions[index]),
-        ),
+        child: _functions.isNotEmpty
+            ? AnimationLimiter(
+                child: GridView.count(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.8,
+                  children: _functions
+                      .map(
+                        (e) => AnimationConfiguration.staggeredGrid(
+                          position: _functions.indexOf(e),
+                          columnCount: 2,
+                          delay: const Duration(milliseconds: 50),
+                          child: ScaleAnimation(
+                            child: FadeInAnimation(
+                              child: _ModelItem(function: e),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              )
+            : Center(
+                child: LoadingAnimationWidget.fourRotatingDots(
+                  color: context.theme.primaryColor,
+                  size: 48,
+                ),
+              ),
       ),
     );
   }
@@ -67,7 +87,6 @@ class _ModelItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 256 + 64,
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
         color: context.theme.cardColor,
@@ -84,7 +103,7 @@ class _ModelItem extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              height: 128,
+              // height: 256,
               decoration: BoxDecoration(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
@@ -126,7 +145,7 @@ class _ModelItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     switch (function.type) {
-                      case 'solo':
+                      case 'solo' || 'anime':
                         Get.toNamed(AppRouter.soloGeneratePage,
                             arguments: function);
                         break;
@@ -135,7 +154,7 @@ class _ModelItem extends StatelessWidget {
                             arguments: function);
                         break;
                       default:
-                        Get.snackbar('错误', '未知的模型类型');
+                        EasyLoading.showError('未知的模型类型');
                     }
                   },
                   child: Container(

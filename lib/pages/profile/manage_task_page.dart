@@ -1,6 +1,7 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
@@ -17,12 +18,17 @@ class ManageTaskPage extends StatefulWidget {
 
 class _ManageTaskPageState extends State<ManageTaskPage> {
   final List<TaskVO> _tasks = [];
+  bool _isLoading = false;
 
   Future<void> _loadData() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
     var data = await GenerateApi.getTaskList();
     setState(() {
       _tasks.clear();
       _tasks.addAll(data);
+      _isLoading = false;
     });
   }
 
@@ -45,29 +51,51 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: RefreshIndicator(
           onRefresh: () => _loadData(),
-          child: (_tasks.isNotEmpty)
-              ? GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.7,
+          child: (_isLoading)
+              ? Center(
+                  child: LoadingAnimationWidget.fourRotatingDots(
+                    color: context.theme.primaryColor,
+                    size: 36,
                   ),
-                  itemCount: _tasks.length,
-                  itemBuilder: (context, index) {
-                    return _TaskItem(task: _tasks[index]);
-                  },
                 )
-              : const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.hourglass_empty, size: 32),
-                      const SizedBox(height: 8),
-                      Text('暂无作品'),
-                    ],
-                  ),
-                ),
+              : (_tasks.isNotEmpty)
+                  ? AnimationLimiter(
+                      child: GridView.count(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.7,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        children: _tasks
+                            .map(
+                              (e) => AnimationConfiguration.staggeredGrid(
+                                position: _tasks.indexOf(e),
+                                columnCount: 2,
+                                delay: const Duration(milliseconds: 50),
+                                child: ScaleAnimation(
+                                  child: FadeInAnimation(
+                                    child: _TaskItem(task: e),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.hourglass_empty,
+                            size: 32,
+                            color: context.theme.primaryColor,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('暂无作品'),
+                        ],
+                      ),
+                    ),
         ),
       ),
     );
@@ -175,20 +203,22 @@ class _TaskItem extends StatelessWidget {
                     )
                   : Center(
                       child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 32),
-                        if (task.statusCode == 1 || task.statusCode == 2)
-                          LoadingAnimationWidget.staggeredDotsWave(
-                            color: context.theme.primaryColor,
-                            size: 24,
-                          ),
-                        if (task.statusCode == 4)
-                          const Icon(Icons.error, size: 32, color: Colors.red),
-                        const SizedBox(height: 8),
-                        Text(_getStatus()),
-                      ],
-                    )),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 32),
+                          if (task.statusCode == 1 || task.statusCode == 2)
+                            LoadingAnimationWidget.staggeredDotsWave(
+                              color: context.theme.primaryColor,
+                              size: 24,
+                            ),
+                          if (task.statusCode == 4)
+                            const Icon(Icons.error,
+                                size: 32, color: Colors.red),
+                          const SizedBox(height: 8),
+                          Text(_getStatus()),
+                        ],
+                      ),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),

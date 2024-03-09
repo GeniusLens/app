@@ -1,6 +1,7 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
@@ -42,16 +43,24 @@ class _EntrancePageState extends State<EntrancePage> {
             SliverToBoxAdapter(child: _TemplatesHeader(labels: _labels)),
             SliverPadding(
               padding: const EdgeInsets.all(16),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) =>
-                      _TemplateItem(function: _functions[index]),
-                  childCount: _functions.length,
-                ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              sliver: AnimationLimiter(
+                child: SliverGrid.count(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
+                  children: _functions.map((e) {
+                    return AnimationConfiguration.staggeredGrid(
+                      position: _functions.indexOf(e),
+                      duration: const Duration(milliseconds: 375),
+                      delay: const Duration(milliseconds: 20),
+                      columnCount: 3,
+                      child: ScaleAnimation(
+                        child: FadeInAnimation(
+                          child: _TemplateItem(function: e),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -257,12 +266,25 @@ class _AIModelsState extends State<_AIModels> {
                 ),
                 SizedBox(
                   height: 224,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _models.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return _AIModelItem(lora: _models[index]);
-                    },
+                  child: AnimationLimiter(
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _models.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        // return _AIModelItem(lora: _models[index]);
+                        return AnimationConfiguration.staggeredList(
+                          position: index,
+                          duration: const Duration(milliseconds: 375),
+                          child: SlideAnimation(
+                            horizontalOffset: 50.0,
+                            delay: Duration(milliseconds: 20 + 10 * index),
+                            child: FadeInAnimation(
+                              child: _AIModelItem(lora: _models[index]),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

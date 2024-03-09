@@ -77,17 +77,20 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
                         : Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: context.theme.primaryColor,
                               borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black12,
                                   blurRadius: 8,
-                                  offset: const Offset(3, 3),
+                                  offset: Offset(3, 3),
                                 ),
                               ],
                             ),
-                            child: const Text('上传视频'),
+                            child: const Text(
+                              '上传视频',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                   )
                 : Container(
@@ -118,7 +121,13 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
           ),
         ),
         if (_loras.isNotEmpty)
-          const Text('选择分身', style: TextStyle(fontSize: 16)),
+          Text(
+            '选择分身',
+            style: TextStyle(
+              fontSize: 16,
+              color: context.theme.primaryColor,
+            ),
+          ),
         if (_loras.isNotEmpty)
           Container(
             height: 128,

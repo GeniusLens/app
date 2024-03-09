@@ -24,6 +24,7 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
   String? _referenceUrl;
   bool _uploading = false;
   bool _thingking = false;
+  bool _getReferencing = false;
   bool _flip = false;
   String? _recommend;
   late final FlipCardController? _flipCardController;
@@ -75,96 +76,116 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
         body: Column(
           // margin: const EdgeInsets.only(bottom: 172),
           children: [
-            const SizedBox(height: 32),
+            const Spacer(),
+            if (_imageUrl == null && !_thingking)
+              Expanded(
+                child: Center(
+                  child: LoadingAnimationWidget.beat(
+                    color: context.theme.primaryColor,
+                    size: 42,
+                  ),
+                ),
+              ),
             if (_imageUrl != null)
               FlipCard(
                 direction: FlipDirection.HORIZONTAL,
                 flipOnTouch: _referenceUrl != null,
-                // onFlipDone: (status) {
-                //   setState(() {
-                //     _flip = !status;
-                //   });
-                // },
+                onFlipDone: (status) {
+                  setState(() {
+                    _flip = status;
+                  });
+                },
                 speed: 300,
                 controller: _flipCardController,
-                front: AnimatedContainer(
+                front: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.theme.primaryColor,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey[300]!,
-                        blurRadius: 4,
-                        spreadRadius: 2,
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: context.theme.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: context.theme.primaryColor,
+                        width: 2,
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: ExtendedImage.network(
-                      _imageUrl!,
-                      loadStateChanged: (state) {
-                        if (state.extendedImageLoadState == LoadState.loading) {
-                          return Center(
-                            child: LoadingAnimationWidget.staggeredDotsWave(
-                              color: context.theme.primaryColor,
-                              size: 24,
-                            ),
-                          );
-                        }
-                        return null;
-                      },
-                      fit: BoxFit.fitWidth,
-                      cache: true,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey[300]!,
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: ExtendedImage.network(
+                        _imageUrl!,
+                        loadStateChanged: (state) {
+                          if (state.extendedImageLoadState ==
+                              LoadState.loading) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              alignment: Alignment.center,
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: context.theme.primaryColor,
+                                size: 24,
+                              ),
+                            );
+                          }
+                          return null;
+                        },
+                        fit: BoxFit.fitWidth,
+                        cache: true,
+                      ),
                     ),
                   ),
                 ),
-                back: AnimatedContainer(
+                back: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.theme.primaryColor,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey[300]!,
-                        blurRadius: 4,
-                        spreadRadius: 2,
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: context.theme.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: context.theme.primaryColor,
+                        width: 2,
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: ExtendedImage.network(
-                      _referenceUrl ?? '',
-                      loadStateChanged: (state) {
-                        if (state.extendedImageLoadState == LoadState.loading) {
-                          return Center(
-                            child: LoadingAnimationWidget.staggeredDotsWave(
-                              color: context.theme.primaryColor,
-                              size: 24,
-                            ),
-                          );
-                        }
-                        return null;
-                      },
-                      fit: BoxFit.fitWidth,
-                      cache: true,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey[300]!,
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: ExtendedImage.network(
+                        _referenceUrl ?? '',
+                        loadStateChanged: (state) {
+                          if (state.extendedImageLoadState ==
+                              LoadState.loading) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              alignment: Alignment.center,
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: context.theme.primaryColor,
+                                size: 24,
+                              ),
+                            );
+                          }
+                          return null;
+                        },
+                        fit: BoxFit.fitWidth,
+                        cache: true,
+                      ),
                     ),
                   ),
                 ),
               ),
             const Spacer(),
+            const SizedBox(height: 172),
           ],
         ),
         panel: Container(
@@ -229,7 +250,7 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
                         }
                       }),
                 if (_uploading || _thingking)
-                  LoadingAnimationWidget.discreteCircle(
+                  LoadingAnimationWidget.horizontalRotatingDots(
                     color: context.theme.primaryColor,
                     size: 32,
                   ),
@@ -249,12 +270,17 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
                         const Spacer(),
                         GestureDetector(
                           onTap: () async {
+                            setState(() => _getReferencing = true);
                             var result = await GenerateApi.getReferenceImage(
                               _recommend!,
                             );
                             setState(() {
                               _referenceUrl = result;
-                              _flipCardController?.toggleCard();
+                              // 仅在处于正面时翻转卡片
+                              if (_flip) {
+                                _flipCardController?.toggleCard();
+                              }
+                              _getReferencing = false;
                             });
                           },
                           child: Container(
@@ -262,13 +288,28 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
                             decoration: BoxDecoration(
                               color: context.theme.primaryColor,
                               borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey[300]!,
+                                  blurRadius: 4,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
-                            child: const Text(
-                              '获得参考',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
+                            child: _getReferencing
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child:
+                                        LoadingAnimationWidget.prograssiveDots(
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  )
+                                : Text(
+                                    _referenceUrl == null ? '获取参考' : '重新获取',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                           ),
                         ),
                       ],

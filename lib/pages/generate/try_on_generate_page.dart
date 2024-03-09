@@ -10,6 +10,7 @@ import 'package:genius_lens/data/entity/common.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class TryOnGeneratePage extends StatefulWidget {
@@ -40,11 +41,24 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
       if (result.statusCode == 3 || result.statusCode == 4) {
         timer.cancel();
         EasyLoading.dismiss();
-        task = result;
+        // 处理失败情况
+        // && _waiting 是为了防止在试穿失败时重复弹出Toast，所谓防抖
+        if (result.statusCode == 4 && _waiting) {
+          EasyLoading.showToast('试穿失败');
+          setState(() {
+            _waiting = false;
+          });
+          return;
+        }
+
+        // 处理成功情况
         // 按照,分割并去掉最后一个空字符串
+        task = result;
         var resultList = task!.result!.split(',').sublist(0, 3);
         setState(() {
           _waiting = false;
+          // 移除第一个元素以外的所有元素
+          _images.removeRange(1, _images.length);
           _images.addAll(resultList);
         });
       }
@@ -61,12 +75,12 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
 
   Future<void> _loadFunction() async {
     var result = await GenerateApi.getFunctionList(_category.name);
-    if (result.isNotEmpty && result.length == 1) {
+    if (result.isNotEmpty) {
       setState(() {
-        _function = result[0];
+        _function =
+            result.where((element) => element.name == _category.name).first;
       });
     }
-    print(_function);
   }
 
   @override
@@ -81,12 +95,21 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: Text(_category.name),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         actions: [
           GestureDetector(
             onTap: () async {
+              if (_waiting) {
+                EasyLoading.showToast('正在试穿中');
+                return;
+              }
+              if (_selected == -1) {
+                EasyLoading.showToast('请选择衣服');
+                return;
+              }
+              setState(() => _waiting = true);
               List<String> images = [];
               images.add(_images[0]);
               images.add(_clothes[_selected].url!);
@@ -99,10 +122,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 EasyLoading.showToast('提交失败');
                 return;
               }
-              setState(() {
-                _waiting = true;
-                _taskId = result;
-              });
+              setState(() => _taskId = result);
               _loadTask();
             },
             child: Container(
@@ -119,14 +139,22 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                   ),
                 ],
               ),
-              child: const Text(
-                '试穿',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: (_waiting)
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: LoadingAnimationWidget.prograssiveDots(
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    )
+                  : const Text(
+                      '试穿',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -208,6 +236,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
+                          if (_waiting) return;
                           if (_selected == index) {
                             _selected = -1;
                           } else {
@@ -277,7 +306,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       color: context.theme.cardColor,
-                      border: (index == 0)
+                      border: (index == 0 && !_waiting)
                           ? Border.all(
                               color: Theme.of(context).primaryColor,
                               width: 2,
@@ -291,23 +320,62 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                         ),
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        _images[index],
-                        fit: BoxFit.cover,
-                      ),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: ExtendedImage.network(
+                              _images[index],
+                              loadStateChanged: (state) {
+                                if (state.extendedImageLoadState ==
+                                    LoadState.loading) {
+                                  return Center(
+                                    child:
+                                        LoadingAnimationWidget.prograssiveDots(
+                                      color: context.theme.primaryColor,
+                                      size: 32,
+                                    ),
+                                  );
+                                } else if (state.extendedImageLoadState ==
+                                    LoadState.failed) {
+                                  return const Center(
+                                    child: Icon(Icons.error),
+                                  );
+                                }
+                                return null;
+                              },
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        // 加载时添加一个蒙版
+                        AnimatedOpacity(
+                          opacity: _waiting ? 0.5 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   );
                 },
               ),
             ),
-            if (_waiting)
-              Container(
-                padding: const EdgeInsets.all(8),
-                margin: const EdgeInsets.only(bottom: 8),
-                child: const LinearProgressIndicator(),
-              ),
+            // if (_waiting)
+            // Container(
+            //   padding: const EdgeInsets.all(8),
+            //   margin: const EdgeInsets.only(bottom: 8),
+            //   child: const LinearProgressIndicator(),
+            // ),
             const SizedBox(height: 280),
           ],
         ),

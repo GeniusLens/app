@@ -5,6 +5,7 @@ import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ManageModelPage extends StatefulWidget {
   const ManageModelPage({super.key});
@@ -16,13 +17,16 @@ class ManageModelPage extends StatefulWidget {
 class _ManageModelPageState extends State<ManageModelPage> {
   final List<LoraVO> _models = [];
   int _selectedIndex = 0;
+  bool _isLoading = false;
 
   Future<void> _loadModels() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
     var list = await GenerateApi.getUserLoraList();
-    print("Loading models: $list");
     setState(() {
       _models.clear();
       _models.addAll(list);
+      _isLoading = false;
     });
   }
 
@@ -38,85 +42,93 @@ class _ManageModelPageState extends State<ManageModelPage> {
       appBar: AppBar(
         title: const Text('我的AI分身'),
       ),
-      body: (_models.isEmpty)
-          ? const _NoModelPage()
-          : Column(
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: Image(
-                          image: ExtendedImage.network(
-                            _models[_selectedIndex].avatar,
-                            cache: true,
-                            loadStateChanged: (state) {
-                              if (state.extendedImageLoadState ==
-                                  LoadState.loading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              return null;
-                            },
-                          ).image,
-                          fit: BoxFit.cover,
-                        ),
+      body: (_isLoading)
+          ? Center(
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: context.theme.primaryColor,
+                size: 36,
+              ),
+            )
+          : (_models.isEmpty)
+              ? const _NoModelPage()
+              : Column(
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Image(
+                              image: ExtendedImage.network(
+                                _models[_selectedIndex].avatar,
+                                cache: true,
+                                loadStateChanged: (state) {
+                                  if (state.extendedImageLoadState ==
+                                      LoadState.loading) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return null;
+                                },
+                              ).image,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned.fill(
+                            child: Container(
+                              color: Colors.black.withOpacity(0.1),
+                            ),
+                          ),
+                          if (_models.isNotEmpty)
+                            Positioned(
+                              bottom: 16,
+                              left: 16,
+                              right: 16,
+                              child: Center(
+                                child:
+                                    _InfoCard(model: _models[_selectedIndex]),
+                              ),
+                            ),
+                        ],
                       ),
-                      Positioned.fill(
-                        child: Container(
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                      ),
-                      if (_models.isNotEmpty)
-                        Positioned(
-                          bottom: 16,
-                          left: 16,
-                          right: 16,
-                          child: Center(
-                            child: _InfoCard(model: _models[_selectedIndex]),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                if (_models.isNotEmpty)
-                  Container(
-                    height: 172,
-                    padding: const EdgeInsets.all(16),
-                    color: context.theme.cardColor,
-                    child: Column(
-                      children: [
-                        Text(
-                          '${_selectedIndex + 1} / ${_models.length}',
-                          style: TextStyle(
-                            color: context.theme.primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 96,
-                          child: Swiper(
-                            itemCount: _models.length,
-                            scale: 0.8,
-                            viewportFraction: 0.35,
-                            onIndexChanged: (index) {
-                              setState(() {
-                                _selectedIndex = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return _ModelItem(
-                                  isCurrent: index == _selectedIndex,
-                                  model: _models[index]);
-                            },
-                          ),
-                        )
-                      ],
                     ),
-                  ),
-              ],
-            ),
+                    if (_models.isNotEmpty)
+                      Container(
+                        height: 172,
+                        padding: const EdgeInsets.all(16),
+                        color: context.theme.cardColor,
+                        child: Column(
+                          children: [
+                            Text(
+                              '${_selectedIndex + 1} / ${_models.length}',
+                              style: TextStyle(
+                                color: context.theme.primaryColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 96,
+                              child: Swiper(
+                                itemCount: _models.length,
+                                scale: 0.8,
+                                viewportFraction: 0.35,
+                                onIndexChanged: (index) {
+                                  setState(() {
+                                    _selectedIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  return _ModelItem(
+                                      isCurrent: index == _selectedIndex,
+                                      model: _models[index]);
+                                },
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
     );
   }
 }

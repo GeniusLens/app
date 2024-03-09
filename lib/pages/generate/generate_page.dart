@@ -1,8 +1,10 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../api/request/generate.dart';
 
@@ -95,13 +97,20 @@ class _GeneratePageState extends State<GeneratePage>
         onRefresh: _loadCategory,
         child: TabBarView(
           controller: _tabController,
-          children: _categories
-              .map(
-                (e) => _GenerateList(
-                    subCategories: _subCategories[e.name] ?? [],
-                    key: ValueKey(e.name)),
-              )
-              .toList(),
+          children: _categories.map((e) {
+            if (_subCategories[e.name] == null ||
+                _subCategories[e.name]!.isEmpty) {
+              return Center(
+                child: LoadingAnimationWidget.fourRotatingDots(
+                  color: context.theme.primaryColor,
+                  size: 36,
+                ),
+              );
+            }
+            return _GenerateList(
+                subCategories: _subCategories[e.name] ?? [],
+                key: ValueKey(e.name));
+          }).toList(),
         ),
       ),
     );
@@ -138,26 +147,37 @@ class _GenerateListState extends State<_GenerateList>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListView.builder(
-        itemCount: widget.subCategories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == widget.subCategories.length) {
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: const Center(
-                child: Text(
-                  '已经到底部啦',
-                  style: TextStyle(color: Colors.grey),
+    return AnimationLimiter(
+      child: ListView.builder(
+          itemCount: widget.subCategories.length + 1,
+          itemBuilder: (context, index) {
+            if (index == widget.subCategories.length) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: const Center(
+                  child: Text(
+                    '已经到底部啦',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              );
+            }
+            return AnimationConfiguration.staggeredList(
+              position: index,
+              duration: const Duration(milliseconds: 375),
+              child: SlideAnimation(
+                verticalOffset: 50.0,
+                delay: Duration(milliseconds: 10 * index),
+                child: FadeInAnimation(
+                  child: _GenerateItem(
+                    item: widget.subCategories[index],
+                    route: _buildRoute(widget.subCategories[index]),
+                  ),
                 ),
               ),
             );
-          }
-          return _GenerateItem(
-            item: widget.subCategories[index],
-            route: _buildRoute(widget.subCategories[index]),
-            key: ValueKey(widget.subCategories[index].name),
-          );
-        });
+          }),
+    );
   }
 }
 

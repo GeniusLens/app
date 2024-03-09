@@ -1,5 +1,6 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 
 import '../../api/request/common.dart';
@@ -66,38 +67,50 @@ class _MessagePageState extends State<MessagePage>
         controller: _tabController,
         children: tabs.map((e) {
           return RefreshIndicator(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                // 只选择对应的type
-                itemCount: messages
-                        .where((element) => element.type == _tabType[e])
-                        .toList()
-                        .length +
-                    1,
-                itemBuilder: (context, index) {
-                  if (index ==
-                      messages
+              child: AnimationLimiter(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  // 只选择对应的type
+                  itemCount: messages
                           .where((element) => element.type == _tabType[e])
                           .toList()
-                          .length) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: const Center(
-                        child: Text(
-                          '已经到底部啦',
-                          style: TextStyle(
-                            color: Colors.grey,
+                          .length +
+                      1,
+                  itemBuilder: (context, index) {
+                    if (index ==
+                        messages
+                            .where((element) => element.type == _tabType[e])
+                            .toList()
+                            .length) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: const Center(
+                          child: Text(
+                            '已经到底部啦',
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      child: SlideAnimation(
+                        verticalOffset: 50.0,
+                        duration: const Duration(milliseconds: 400),
+                        delay: Duration(milliseconds: 10 * index),
+                        child: FadeInAnimation(
+                          child: _MessageCard(
+                            data: messages
+                                .where((element) => element.type == _tabType[e])
+                                .toList()[index],
                           ),
                         ),
                       ),
                     );
-                  }
-                  return _MessageCard(
-                    data: messages
-                        .where((element) => element.type == _tabType[e])
-                        .toList()[index],
-                  );
-                },
+                  },
+                ),
               ),
               onRefresh: () {
                 messages.clear();

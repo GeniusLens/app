@@ -5,6 +5,7 @@ import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
 import 'package:genius_lens/pages/community/community_card.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class EEE {
   String url;
@@ -142,40 +143,56 @@ class _CommunityPageState extends State<CommunityPage>
           // ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshData,
-        child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: Constants.globalPadding),
-          child: (_list.isNotEmpty)
-              ? MasonryGridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 2,
-                  crossAxisSpacing: 2,
-                  itemCount: _list.length,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    var item = _list[index];
-                    var height = _basicWidth + 32 * (item.cardHeight ?? 2);
-                    return GestureDetector(
-                      onTap: () {
-                        Get.toNamed('/community/detail', arguments: item);
-                      },
-                      child: SizedBox(
-                        height: height,
-                        child: CommunityCard(item, () => _onLike(index)),
+      body: (_isLoading)
+          ? Center(
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: context.theme.primaryColor,
+                size: 36,
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshData,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: Constants.globalPadding),
+                child: (_list.isNotEmpty)
+                    ? MasonryGridView.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 2,
+                        crossAxisSpacing: 2,
+                        itemCount: _list.length,
+                        controller: _scrollController,
+                        itemBuilder: (context, index) {
+                          var item = _list[index];
+                          var height =
+                              _basicWidth + 32 * (item.cardHeight ?? 2);
+                          return GestureDetector(
+                            onTap: () {
+                              Get.toNamed('/community/detail', arguments: item);
+                            },
+                            child: SizedBox(
+                              height: height,
+                              child: CommunityCard(item, () => _onLike(index)),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.hourglass_empty,
+                              size: 36,
+                              color: context.theme.primaryColor,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('暂无数据'),
+                          ],
+                        ),
                       ),
-                    );
-                  },
-                )
-              : GestureDetector(
-                  onTap: _refreshData,
-                  child: const Center(
-                    child: Text('暂无数据，点击刷新'),
-                  ),
-                ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 }

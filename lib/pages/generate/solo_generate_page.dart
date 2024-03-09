@@ -1,8 +1,10 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../api/request/generate.dart';
@@ -20,6 +22,7 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
   final List<LoraVO> _loras = [];
   int _index = 0;
   int _selected = -1;
+  bool _submitting = false;
   DateTime _lastTime = DateTime.now();
 
   Future<void> _fetchLoraList() async {
@@ -49,22 +52,9 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
       body: SafeArea(
         child: Column(
           children: [
-            const Spacer(flex: 1),
-            if (_loras.isNotEmpty && _selected != -1)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  '您已选择 ${_loras[_selected].name}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.primaryColor.withOpacity(0.6),
-                  ),
-                ),
-              ),
             if (_loras.isNotEmpty)
               Container(
-                margin: const EdgeInsets.only(bottom: 16),
+                margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(8),
                 child: AnimatedSmoothIndicator(
                   activeIndex: _index,
@@ -77,6 +67,22 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                     activeDotColor: context.theme.primaryColor,
                     dotHeight: 8,
                     dotWidth: 8,
+                  ),
+                ),
+              ),
+            const Spacer(flex: 1),
+            if (_loras.isNotEmpty && _selected != -1)
+              AnimatedOpacity(
+                opacity: _selected != -1 ? 1 : 0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    '您已选择 ${_loras[_selected].name}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.primaryColor.withOpacity(0.7),
+                    ),
                   ),
                 ),
               ),
@@ -176,69 +182,97 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   ],
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                _loras.isEmpty ? '加载中...' : _loras[_index].name!,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: context.theme.primaryColor.withOpacity(0.6),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '${_loras.isEmpty ? '加载中...' : _loras[_index].description}',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-            const Spacer(flex: 2),
-            GestureDetector(
-              onTap: () async {
-                if (_selected == -1) {
-                  EasyLoading.showToast('请选择一个Lora模型');
-                  return;
-                }
-                var id = await GenerateApi.submitTask(
-                  f: function,
-                  lora: List.generate(1, (index) => _loras[_selected]),
-                  images: List.generate(
-                      1,
-                      (index) =>
-                          'https://i0.hdslb.com/bfs/article/cc69633424388f57c12f20c89a33430144224985.jpg'),
-                );
-                print('id: $id');
-                if (id == null) {
-                  EasyLoading.showToast('生成失败');
-                  return;
-                }
-                var task = await GenerateApi.getTaskInfo(id);
-                print('task: $task');
-                Get.offAndToNamed(AppRouter.manageTaskPage, arguments: task);
-              },
-              child: Container(
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                decoration: BoxDecoration(
+            if (_loras.isEmpty)
+              Center(
+                child: LoadingAnimationWidget.fourRotatingDots(
                   color: context.theme.primaryColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
+                  size: 48,
                 ),
-                alignment: Alignment.center,
-                child: const Text(
-                  '生成',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            if (_loras.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  _loras[_index].name!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: context.theme.primaryColor.withOpacity(0.6),
+                  ),
+                ),
+              ),
+            if (_loras.isNotEmpty && _loras[_index].description != null)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  '${_loras[_index].description}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            const Spacer(flex: 2),
+            AnimatedOpacity(
+              opacity: _loras.isNotEmpty ? 1 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: GestureDetector(
+                onTap: () async {
+                  if (_loras.isEmpty) {
+                    return;
+                  }
+                  if (_selected == -1) {
+                    EasyLoading.showToast('请选择一个Lora模型');
+                    return;
+                  }
+                  setState(() {
+                    _submitting = true;
+                  });
+                  var id = await GenerateApi.submitTask(
+                    f: function,
+                    lora: List.generate(1, (index) => _loras[_selected]),
+                    images: List.generate(
+                        1,
+                        (index) =>
+                            'https://i0.hdslb.com/bfs/article/cc69633424388f57c12f20c89a33430144224985.jpg'),
+                  );
+                  if (id == null) {
+                    EasyLoading.showToast('生成失败');
+                    return;
+                  }
+                  var task = await GenerateApi.getTaskInfo(id);
+                  setState(() {
+                    _submitting = false;
+                  });
+                  Get.offAndToNamed(AppRouter.manageTaskPage, arguments: task);
+                },
+                child: Container(
+                  height: 48,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.theme.primaryColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: (!_submitting)
+                      ? const Text(
+                          '生成',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        )
+                      : LoadingAnimationWidget.prograssiveDots(
+                          color: Colors.white,
+                          size: 32,
+                        ),
                 ),
               ),
             ),

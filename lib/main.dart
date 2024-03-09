@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:genius_lens/provider/community_provider.dart';
 import 'package:genius_lens/provider/user_provider.dart';
 import 'package:genius_lens/router.dart';
 import 'package:genius_lens/utils/package_util.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => CommunityProvider()),
       ],
       child: GetMaterialApp(
         title: '创艺相机',

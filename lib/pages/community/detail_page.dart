@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
+import 'package:genius_lens/data/entity/generate.dart';
+import 'package:genius_lens/provider/community_provider.dart';
 import 'package:genius_lens/utils/debug_util.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class CommunityDetailPage extends StatefulWidget {
   const CommunityDetailPage({super.key});
@@ -15,24 +18,7 @@ class CommunityDetailPage extends StatefulWidget {
 }
 
 class _CommunityDetailPageState extends State<CommunityDetailPage> {
-  late final CommunityVO? _content;
-
-  Future<void> _loadFunction() async {
-    var f = await GenerateApi.getFunction(1);
-    debugPrint('function: $f');
-    setState(() {
-      _content?.function = f;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _content = Get.arguments as CommunityVO;
-    debugPrint('CommunityDetailPage: $_content');
-    setState(() {});
-    _loadFunction();
-  }
+  CommunityVO? _content;
 
   Widget _buildAppBarHeader() {
     return Row(
@@ -70,7 +56,14 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _content = context.watch<CommunityProvider>().community;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -233,7 +226,7 @@ class _CommentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: context.theme.cardColor,
