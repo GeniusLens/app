@@ -48,7 +48,10 @@ class _CommunityPageState extends State<CommunityPage>
     var list = await CommunityApi().getCommunityRecommendList();
     debugPrint('item count: ${list.length}');
     debugPrint(list.toString());
-    setState(() => _list.addAll(list));
+    setState(() {
+      _list.addAll(list);
+      _isLoading = false;
+    });
   }
 
   Future<void> _refreshData() async {
@@ -143,7 +146,7 @@ class _CommunityPageState extends State<CommunityPage>
           // ),
         ],
       ),
-      body: (_isLoading)
+      body: (_isLoading && _list.isEmpty)
           ? Center(
               child: LoadingAnimationWidget.fourRotatingDots(
                 color: context.theme.primaryColor,
