@@ -47,6 +47,7 @@ dependencies:
   video_thumbnail: ^0.5.3
   video_player: ^2.8.3
   loading_animation_widget: ^1.2.0+4
+  flip_card: ^0.7.0
 
 dev_dependencies:
   flutter_test:

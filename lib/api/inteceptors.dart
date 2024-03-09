@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (ApiState().isLogin) {
+    if (ApiState().isLogin && !options.headers.containsKey('Authorization')) {
       options.headers['Authorization'] = 'Bearer ${ApiState().tokenValue}';
     }
     super.onRequest(options, handler);

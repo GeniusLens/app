@@ -112,12 +112,16 @@ class _ModelItem extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(function.name ?? '', style: const TextStyle(fontSize: 16)),
+                Text(
+                  function.name ?? '',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 16),
+                ),
                 const Spacer(),
                 GestureDetector(
                   onTap: () {

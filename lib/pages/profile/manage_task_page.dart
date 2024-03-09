@@ -160,8 +160,11 @@ class _TaskItem extends StatelessWidget {
                         loadStateChanged: (state) {
                           if (state.extendedImageLoadState ==
                               LoadState.loading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return Center(
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: context.theme.primaryColor,
+                                size: 24,
+                              ),
                             );
                           }
                           return null;
