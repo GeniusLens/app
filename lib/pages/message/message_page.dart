@@ -2,6 +2,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../api/request/common.dart';
 import '../../data/entity/common.dart';
@@ -16,7 +17,12 @@ class MessagePage extends StatefulWidget {
 class _MessagePageState extends State<MessagePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  final List<String> tabs = ["喜欢", "评论", "系统消息"];
+  final List<String> tabs = ["系统消息", "喜欢", "评论"];
+  final Map<String, bool> _tabLoading = {
+    "喜欢": false,
+    "评论": false,
+    "系统消息": false,
+  };
   final Map<String, int> _tabType = {
     "喜欢": 1,
     "评论": 2,
@@ -25,9 +31,17 @@ class _MessagePageState extends State<MessagePage>
   final List<MessageVO> messages = [];
 
   Future<void> _loadData() async {
+    setState(() {
+      _tabLoading["喜欢"] = true;
+      _tabLoading["评论"] = true;
+      _tabLoading["系统消息"] = true;
+    });
     var data = await CommonAPi.getMessages();
     setState(() {
       messages.addAll(data);
+      _tabLoading["喜欢"] = false;
+      _tabLoading["评论"] = false;
+      _tabLoading["系统消息"] = false;
     });
   }
 
@@ -67,51 +81,60 @@ class _MessagePageState extends State<MessagePage>
         controller: _tabController,
         children: tabs.map((e) {
           return RefreshIndicator(
-              child: AnimationLimiter(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  // 只选择对应的type
-                  itemCount: messages
-                          .where((element) => element.type == _tabType[e])
-                          .toList()
-                          .length +
-                      1,
-                  itemBuilder: (context, index) {
-                    if (index ==
-                        messages
-                            .where((element) => element.type == _tabType[e])
-                            .toList()
-                            .length) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: const Center(
-                          child: Text(
-                            '已经到底部啦',
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      child: SlideAnimation(
-                        verticalOffset: 50.0,
-                        duration: const Duration(milliseconds: 400),
-                        delay: Duration(milliseconds: 10 * index),
-                        child: FadeInAnimation(
-                          child: _MessageCard(
-                            data: messages
-                                .where((element) => element.type == _tabType[e])
-                                .toList()[index],
-                          ),
-                        ),
+              child: (_tabLoading[e] ?? false)
+                  ? Center(
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: context.theme.primaryColor,
+                        size: 36,
                       ),
-                    );
-                  },
-                ),
-              ),
+                    )
+                  : AnimationLimiter(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        // 只选择对应的type
+                        itemCount: messages
+                                .where((element) => element.type == _tabType[e])
+                                .toList()
+                                .length +
+                            1,
+                        itemBuilder: (context, index) {
+                          if (index ==
+                              messages
+                                  .where(
+                                      (element) => element.type == _tabType[e])
+                                  .toList()
+                                  .length) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: const Center(
+                                child: Text(
+                                  '已经到底部啦',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              duration: const Duration(milliseconds: 400),
+                              delay: Duration(milliseconds: 10 * index),
+                              child: FadeInAnimation(
+                                child: _MessageCard(
+                                  data: messages
+                                      .where((element) =>
+                                          element.type == _tabType[e])
+                                      .toList()[index],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
               onRefresh: () {
                 messages.clear();
                 return _loadData();
