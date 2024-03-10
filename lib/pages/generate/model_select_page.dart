@@ -145,12 +145,12 @@ class _ModelItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     switch (function.type) {
-                      case 'solo' || 'anime':
-                        Get.toNamed(AppRouter.soloGeneratePage,
+                      case 'solo':
+                        Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
                         break;
                       case 'multi':
-                        Get.toNamed(AppRouter.multiGeneratePage,
+                        Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
                         break;
                       default:

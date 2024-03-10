@@ -9,6 +9,7 @@ import 'package:genius_lens/pages/generate/multi_generate_page.dart';
 import 'package:genius_lens/pages/generate/solo_generate_page.dart';
 import 'package:genius_lens/pages/generate/try_on_generate_page.dart';
 import 'package:genius_lens/pages/generate/video_generate_page.dart';
+import 'package:genius_lens/pages/generate/view_generate_example.dart';
 import 'package:genius_lens/pages/generate/wear_evaluation_page.dart';
 import 'package:genius_lens/pages/index.dart';
 import 'package:genius_lens/pages/login/login_page.dart';
@@ -35,6 +36,7 @@ class AppRouter {
   static const String modelCreatePage = '/model/create';
   static const String selectModelPage = '/model/select';
 
+  static const String viewGenerateExamplePage = '/generate/view';
   static const String soloGeneratePage = '/generate/solo';
   static const String multiGeneratePage = '/generate/multi';
   static const String videoGeneratePage = '/generate/video';
@@ -65,6 +67,7 @@ class AppRouter {
     mainPage: () => const Text('Main'),
     modelCreatePage: () => const ModelCreatePage(),
     selectModelPage: () => const ModelSelectPage(),
+    viewGenerateExamplePage: () => const ViewGenerateExamplePage(),
     soloGeneratePage: () => const SoloGeneratePage(),
     multiGeneratePage: () => const MultiGeneratePage(),
     videoGeneratePage: () => const VideoGeneratePage(),

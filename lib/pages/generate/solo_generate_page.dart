@@ -21,7 +21,6 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
   late final FunctionVO function;
   final List<LoraVO> _loras = [];
   int _index = 0;
-  int _selected = -1;
   bool _submitting = false;
   DateTime _lastTime = DateTime.now();
 
@@ -71,21 +70,21 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                 ),
               ),
             const Spacer(flex: 1),
-            if (_loras.isNotEmpty && _selected != -1)
-              AnimatedOpacity(
-                opacity: _selected != -1 ? 1 : 0,
-                duration: const Duration(milliseconds: 300),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    '您已选择 ${_loras[_selected].name}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: context.theme.primaryColor.withOpacity(0.7),
-                    ),
-                  ),
-                ),
-              ),
+            // if (_loras.isNotEmpty)
+            //   AnimatedOpacity(
+            //     opacity: 1,
+            //     duration: const Duration(milliseconds: 300),
+            //     child: Container(
+            //       padding: const EdgeInsets.all(8),
+            //       child: Text(
+            //         '您已选择 ${_loras[_selected].name}',
+            //         style: TextStyle(
+            //           fontSize: 16,
+            //           color: context.theme.primaryColor.withOpacity(0.7),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
             if (_loras.isNotEmpty)
               GestureDetector(
                 // 监听左右滑动
@@ -135,13 +134,10 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                       decoration: BoxDecoration(
                         // color: context.theme.cardColor,
                         shape: BoxShape.circle,
-                        border: (_selected == _index)
-                            ? Border.all(
-                                color:
-                                    context.theme.primaryColor.withOpacity(0.8),
-                                width: 2,
-                              )
-                            : null,
+                        border: Border.all(
+                          color: context.theme.primaryColor.withOpacity(0.8),
+                          width: 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -151,13 +147,13 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                         ],
                       ),
                       child: GestureDetector(
-                        onTap: () {
-                          if (_selected != _index) {
-                            setState(() => _selected = _index);
-                          } else {
-                            setState(() => _selected = -1);
-                          }
-                        },
+                        // onTap: () {
+                        //   if (_selected != _index) {
+                        //     setState(() => _selected = _index);
+                        //   } else {
+                        //     setState(() => _selected = -1);
+                        //   }
+                        // },
                         child: CircleAvatar(
                           radius: 224,
                           backgroundImage: ExtendedImage.network(
@@ -223,16 +219,16 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   if (_loras.isEmpty) {
                     return;
                   }
-                  if (_selected == -1) {
-                    EasyLoading.showToast('请选择一个Lora模型');
-                    return;
-                  }
+                  // if (_selected == -1) {
+                  //   EasyLoading.showToast('请选择一个Lora模型');
+                  //   return;
+                  // }
                   setState(() {
                     _submitting = true;
                   });
                   var id = await GenerateApi.submitTask(
                     f: function,
-                    lora: List.generate(1, (index) => _loras[_selected]),
+                    lora: List.generate(1, (index) => _loras[_index]),
                     images: List.generate(
                         1,
                         (index) =>
