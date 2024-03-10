@@ -38,7 +38,7 @@ class _EntrancePageState extends State<EntrancePage> {
         child: CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(child: _Header()),
-            const SliverToBoxAdapter(child: _Functions()),
+            // const SliverToBoxAdapter(child: _Functions()),
             const SliverToBoxAdapter(child: _AIModels()),
             SliverToBoxAdapter(child: _TemplatesHeader(labels: _labels)),
             SliverPadding(
