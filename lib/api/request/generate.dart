@@ -93,7 +93,11 @@ class GenerateApi {
       'clothId': clothId,
     });
     var wrapper = Result.fromJson(response.data);
-    return wrapper.data['id'] as int;
+    return (type == 1)
+        ? wrapper.data['id'] as int
+        : wrapper.code == '200'
+            ? 1
+            : null;
   }
 
   static Future<List<TaskVO>> getTaskList() async {

@@ -7,6 +7,7 @@ import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../api/request/generate.dart';
 import '../../data/entity/generate.dart';
@@ -28,8 +29,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
 
   final ImagePicker _imagePicker = ImagePicker();
   String? _frontImageUrl;
-  bool _isOtherLoading = false;
-  final List<String> _otherImageUrls = [];
+  bool _isFrontLoading = false;
+  final Map<int, bool> _isOtherLoadingMap = {};
+  final List<String?> _otherImageUrls = [];
 
   final List<SampleVO> _samples = [];
 
@@ -104,22 +106,34 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
           ? FloatingActionButton(
               shape: const CircleBorder(),
               onPressed: () async {
-                print(
-                    'submit, front: $_frontImageUrl, other: $_otherImageUrls');
-                // EasyLoading.show(status: '正在生成');
+                // 检查有无还在上传的图片
+                if (_isFrontLoading || _isOtherLoadingMap.containsValue(true)) {
+                  EasyLoading.showError('图片正在上传中，请稍后');
+                  return;
+                }
+                // 提交任务
                 var result = await GenerateApi.submitTask(
                   type: 2,
                   images: [
                     _frontImageUrl!,
-                    ..._otherImageUrls.map((e) => e).toList(),
+                    ..._otherImageUrls
+                        .where((element) => element != null)
+                        .map((e) => e!)
+                        .toList(),
                   ],
                 );
+
                 if (result == null) {
                   EasyLoading.dismiss();
                   EasyLoading.showError('生成失败');
                   return;
+                } else {
+                  EasyLoading.dismiss();
+                  EasyLoading.showSuccess('分身提交成功');
                 }
-                Get.offAndToNamed(AppRouter.manageModelPage);
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Get.offAndToNamed(AppRouter.manageModelPage);
+                });
               },
               child: const Icon(Icons.check),
             )
@@ -138,16 +152,17 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     XFile? file = await _imagePicker.pickImage(
                       source: ImageSource.gallery,
                     );
-                    if (file != null) {
-                      var result = await CommonAPi.uploadFile(file.path);
-                      if (result == null) {
-                        Get.snackbar('上传失败', '请检查网络连接或稍后重试',
-                            snackPosition: SnackPosition.BOTTOM);
-                      }
-                      setState(() {
-                        _frontImageUrl = result;
-                      });
+                    if (file == null) return;
+                    setState(() => _isFrontLoading = true);
+                    var result = await CommonAPi.uploadFile(file.path);
+                    if (result == null) {
+                      Get.snackbar('上传失败', '请检查网络连接或稍后重试',
+                          snackPosition: SnackPosition.BOTTOM);
                     }
+                    setState(() {
+                      _frontImageUrl = result;
+                      _isFrontLoading = false;
+                    });
                   },
                   child: AnimatedSize(
                     duration: const Duration(milliseconds: 300),
@@ -166,11 +181,11 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black12,
                             blurRadius: 8,
-                            offset: const Offset(0, 4),
+                            offset: Offset(2, 2),
                           ),
                         ],
                       ),
@@ -183,8 +198,12 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                                 loadStateChanged: (state) {
                                   if (state.extendedImageLoadState ==
                                       LoadState.loading) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
+                                    return Center(
+                                      child: LoadingAnimationWidget
+                                          .horizontalRotatingDots(
+                                        color: context.theme.primaryColor,
+                                        size: 32,
+                                      ),
                                     );
                                   }
                                   return ExtendedRawImage(
@@ -195,11 +214,17 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                               ),
                             )
                           : Center(
-                              child: Icon(
-                                Icons.add,
-                                size: 48,
-                                color: Colors.grey[600],
-                              ),
+                              child: (_isFrontLoading)
+                                  ? LoadingAnimationWidget
+                                      .horizontalRotatingDots(
+                                      color: context.theme.primaryColor,
+                                      size: 32,
+                                    )
+                                  : Icon(
+                                      Icons.add,
+                                      size: 48,
+                                      color: Colors.grey[600],
+                                    ),
                             ),
                     ),
                   ),
@@ -229,19 +254,47 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                 itemCount: _otherImageUrls.length + 1,
                 itemBuilder: (context, index) {
                   var content = index < _otherImageUrls.length
-                      ? Image.network(
-                          _otherImageUrls[index],
-                          fit: BoxFit.fill,
-                        )
+                      ? _otherImageUrls[index] == null
+                          ? LoadingAnimationWidget.horizontalRotatingDots(
+                              color: context.theme.primaryColor,
+                              size: 32,
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: ExtendedImage.network(
+                                _otherImageUrls[index]!,
+                                cache: true,
+                                loadStateChanged: (state) {
+                                  if (state.extendedImageLoadState ==
+                                      LoadState.loading) {
+                                    return Center(
+                                      child: LoadingAnimationWidget
+                                          .horizontalRotatingDots(
+                                        color: context.theme.primaryColor,
+                                        size: 32,
+                                      ),
+                                    );
+                                  }
+                                  return ExtendedRawImage(
+                                      image: state.extendedImageInfo?.image,
+                                      fit: BoxFit.cover);
+                                },
+                                fit: BoxFit.cover,
+                              ),
+                            )
                       : Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: (_isOtherLoading)
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
+                          child: (_isOtherLoadingMap[index] == true)
+                              ? Center(
+                                  child: LoadingAnimationWidget
+                                      .horizontalRotatingDots(
+                                    color: context.theme.primaryColor,
+                                    size: 32,
+                                  ),
                                 )
                               : Icon(
                                   Icons.add,
@@ -255,16 +308,29 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         // 弹窗询问是否删除
                         bool? result = await Get.dialog<bool>(
                           AlertDialog(
-                            title: const Text('删除照片'),
-                            content: const Text('确定要删除这张照片吗？'),
+                            backgroundColor: context.theme.cardColor,
+                            surfaceTintColor: context.theme.cardColor,
+                            contentPadding: const EdgeInsets.all(16),
+                            titlePadding: const EdgeInsets.all(16),
+                            actionsPadding: const EdgeInsets.all(16),
+                            title: const Text(
+                              '删除图片',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            content: const Text('确定要删除这张图片吗？'),
                             actions: [
                               TextButton(
                                 onPressed: () => Get.back(result: false),
-                                child: const Text('取消'),
+                                child: const Text('取消',
+                                    style: TextStyle(color: Colors.grey)),
                               ),
                               TextButton(
                                 onPressed: () => Get.back(result: true),
-                                child: const Text('确定'),
+                                child: const Text('确定', style: TextStyle()),
                               ),
                             ],
                           ),
@@ -277,22 +343,26 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         return;
                       }
 
-                      XFile? file = await _imagePicker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (file != null) {
+                      List<XFile> selected =
+                          await _imagePicker.pickMultiImage();
+                      if (selected.isEmpty) return;
+                      var oldLength = _otherImageUrls.length;
+                      for (var file in selected) {
+                        var idx = oldLength + selected.indexOf(file);
                         setState(() {
-                          _isOtherLoading = true;
+                          _isOtherLoadingMap[idx] = true;
+                          _otherImageUrls.add(null);
                         });
+                      }
+                      for (var file in selected) {
                         var result = await CommonAPi.uploadFile(file.path);
                         if (result == null) {
-                          Get.snackbar('上传失败', '请检查网络连接或稍后重试',
-                              snackPosition: SnackPosition.BOTTOM);
-                          return;
+                          EasyLoading.showError('上传失败');
                         }
+                        var idx = oldLength + selected.indexOf(file);
                         setState(() {
-                          _otherImageUrls.add(result);
-                          _isOtherLoading = false;
+                          _otherImageUrls[idx] = result!;
+                          _isOtherLoadingMap[idx] = false;
                         });
                       }
                     },
