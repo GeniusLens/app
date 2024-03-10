@@ -25,6 +25,15 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
     setState(() => _isLoading = true);
 
     var data = await GenerateApi.getTaskList();
+    // 检查每一个result是否包含","分隔组成的多个URL
+    // 如果是则仅保留第一个URL
+    for (var element in data) {
+      if (element.result != null && element.result!.contains(',')) {
+        var newElement =
+            element.copyWith(result: element.result!.split(',')[0]);
+        data[data.indexOf(element)] = newElement;
+      }
+    }
     setState(() {
       _tasks.clear();
       _tasks.addAll(data);

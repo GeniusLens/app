@@ -117,4 +117,25 @@ class TaskVO {
   String toString() {
     return toJson().toString();
   }
+
+  // copyWith
+  TaskVO copyWith({
+    int? id,
+    String? taskId,
+    String? result,
+    String? status,
+    int? statusCode,
+    String? function,
+    String? time,
+  }) {
+    return TaskVO(
+      id ?? this.id,
+      taskId ?? this.taskId,
+      result ?? this.result,
+      status ?? this.status,
+      statusCode ?? this.statusCode,
+      function ?? this.function,
+      time ?? this.time,
+    );
+  }
 }
