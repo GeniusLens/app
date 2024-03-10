@@ -43,11 +43,13 @@ class _SettingPageState extends State<SettingPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('设置'),
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _CardWrapper(contexts: _contexts),
+            // _CardWrapper(contexts: _contexts),
             const _CardWrapper(contexts: [
               _Context(
                 false,
