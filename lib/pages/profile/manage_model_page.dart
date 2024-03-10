@@ -18,6 +18,7 @@ class _ManageModelPageState extends State<ManageModelPage> {
   final List<LoraVO> _models = [];
   int _selectedIndex = 0;
   bool _isLoading = false;
+  late final SwiperController _controller;
 
   Future<void> _loadModels() async {
     if (_isLoading) return;
@@ -33,6 +34,7 @@ class _ManageModelPageState extends State<ManageModelPage> {
   @override
   void initState() {
     super.initState();
+    _controller = SwiperController();
     _loadModels();
   }
 
@@ -54,42 +56,52 @@ class _ManageModelPageState extends State<ManageModelPage> {
               : Column(
                   children: [
                     Expanded(
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: Image(
-                              image: ExtendedImage.network(
-                                _models[_selectedIndex].avatar,
-                                cache: true,
-                                loadStateChanged: (state) {
-                                  if (state.extendedImageLoadState ==
-                                      LoadState.loading) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  return null;
-                                },
-                              ).image,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned.fill(
-                            child: Container(
-                              color: Colors.black.withOpacity(0.1),
-                            ),
-                          ),
-                          if (_models.isNotEmpty)
-                            Positioned(
-                              bottom: 16,
-                              left: 16,
-                              right: 16,
-                              child: Center(
-                                child:
-                                    _InfoCard(model: _models[_selectedIndex]),
+                      child: GestureDetector(
+                        // 监听并响应左右滑动事件
+                        onHorizontalDragUpdate: (details) {
+                          if (details.delta.dx > 0) {
+                            _controller.previous();
+                          } else if (details.delta.dx < 0) {
+                            _controller.next();
+                          }
+                        },
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Image(
+                                image: ExtendedImage.network(
+                                  _models[_selectedIndex].avatar,
+                                  cache: true,
+                                  loadStateChanged: (state) {
+                                    if (state.extendedImageLoadState ==
+                                        LoadState.loading) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    }
+                                    return null;
+                                  },
+                                ).image,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                        ],
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.black.withOpacity(0.1),
+                              ),
+                            ),
+                            if (_models.isNotEmpty)
+                              Positioned(
+                                bottom: 16,
+                                left: 16,
+                                right: 16,
+                                child: Center(
+                                  child:
+                                      _InfoCard(model: _models[_selectedIndex]),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     if (_models.isNotEmpty)
@@ -109,6 +121,7 @@ class _ManageModelPageState extends State<ManageModelPage> {
                             SizedBox(
                               height: 96,
                               child: Swiper(
+                                controller: _controller,
                                 itemCount: _models.length,
                                 scale: 0.8,
                                 viewportFraction: 0.35,
@@ -298,7 +311,74 @@ class _InfoCard extends StatelessWidget {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    Get.toNamed(AppRouter.functionPage);
+                    // 弹出编辑对话框
+                    var bottomsheet = Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.theme.cardColor,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '修改分身名称',
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: context.theme.primaryColor),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: context.theme.scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                labelText: '名称',
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () {
+                              // TODO
+                              Get.back();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: context.theme.primaryColor,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: const Text(
+                                '保存',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                    Get.bottomSheet(bottomsheet);
                   },
                   child: const Icon(Icons.edit, color: Colors.white),
                 ),
@@ -313,7 +393,34 @@ class _InfoCard extends StatelessWidget {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    Get.toNamed(AppRouter.functionPage);
+                    Get.dialog(
+                      AlertDialog(
+                        title: Text(
+                          '删除AI分身',
+                          style: TextStyle(
+                              color: context.theme.primaryColor, fontSize: 18),
+                        ),
+                        content: const Text('确定要删除这个AI分身吗？'),
+                        surfaceTintColor: context.theme.cardColor,
+                        backgroundColor: context.theme.scaffoldBackgroundColor,
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: const Text('取消',
+                                style: TextStyle(color: Colors.grey)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // TODO: 删除AI分身
+                              Get.back();
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
