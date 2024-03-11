@@ -32,7 +32,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
   bool _isFrontLoading = false;
   final Map<int, bool> _isOtherLoadingMap = {};
   final List<String?> _otherImageUrls = [];
-
+  String _name = '';
   final List<SampleVO> _samples = [];
 
   Future<void> _loadSamples() async {
@@ -111,9 +111,57 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                   EasyLoading.showError('图片正在上传中，请稍后');
                   return;
                 }
+
+                // 弹窗要求填写名称
+                await Get.dialog(
+                  AlertDialog(
+                    backgroundColor: context.theme.cardColor,
+                    surfaceTintColor: context.theme.cardColor,
+                    contentPadding: const EdgeInsets.all(16),
+                    titlePadding: const EdgeInsets.all(16),
+                    actionsPadding: const EdgeInsets.all(16),
+                    title: const Text(
+                      '分身名称',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    content: TextField(
+                      decoration: const InputDecoration(
+                        hintText: '请输入分身名称',
+                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[800],
+                      ),
+                      onChanged: (value) => _name = value,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(result: null),
+                        child: const Text('取消',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (_name.isEmpty) {
+                            EasyLoading.showError('名称不能为空');
+                            return;
+                          }
+                          Get.back(result: true);
+                        },
+                        child: const Text('确定', style: TextStyle()),
+                      ),
+                    ],
+                  ),
+                );
+                if (_name.isEmpty) return;
                 // 提交任务
                 var result = await GenerateApi.submitTask(
                   type: 2,
+                  sceneId: _name,
                   images: [
                     _frontImageUrl!,
                     ..._otherImageUrls
@@ -132,7 +180,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                   EasyLoading.showSuccess('分身提交成功');
                 }
                 Future.delayed(const Duration(milliseconds: 500), () {
-                  Get.offAndToNamed(AppRouter.manageModelPage);
+                  Get.offNamed(AppRouter.manageModelPage);
                 });
               },
               child: const Icon(Icons.check),
