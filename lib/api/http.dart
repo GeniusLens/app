@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:genius_lens/api/inteceptors.dart';
 
 class HttpUtil {
-  static const String baseUrl = 'https://genius-lens.thuray.xyz';
-  // static const String baseUrl = 'http://10.10.10.211:10086';
+  // static const String baseUrl = 'https://genius-lens.thuray.xyz';
+  static const String baseUrl = 'http://10.10.10.211:10086';
 
   // 构造Dio单例
   static final Dio _dio = Dio(

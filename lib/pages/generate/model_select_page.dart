@@ -109,7 +109,9 @@ class _ModelItem extends StatelessWidget {
                     const BorderRadius.vertical(top: Radius.circular(16)),
                 image: DecorationImage(
                   image: ExtendedImage.network(
-                    function.url ?? 'https://picsum.photos/200/300',
+                    (function.url?.contains(',') ?? false)
+                        ? function.url!.split(',')[0]
+                        : function.url!,
                     cache: true,
                     loadStateChanged: (state) {
                       if (state.extendedImageLoadState == LoadState.loading) {
@@ -145,12 +147,19 @@ class _ModelItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     switch (function.type) {
-                      case 'solo':
+                      case 'solo' || 'dynamic-solo':
                         Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
                         break;
                       case 'multi':
                         Get.toNamed(AppRouter.viewGenerateExamplePage,
+                            arguments: function);
+                        break;
+                      case 'scene':
+                        Get.toNamed(AppRouter.viewGenerateExamplePage,
+                            arguments: function);
+                      case 'anime' || 'dynamic-anime':
+                        Get.toNamed(AppRouter.animeGeneratePage,
                             arguments: function);
                         break;
                       default:

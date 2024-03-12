@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
 import 'package:genius_lens/pages/community/detail_page.dart';
 import 'package:genius_lens/pages/entrance/model_create_page.dart';
+import 'package:genius_lens/pages/generate/anime_generate_page.dart';
 import 'package:genius_lens/pages/generate/generate_result_page.dart';
 import 'package:genius_lens/pages/generate/model_select_page.dart';
 import 'package:genius_lens/pages/generate/multi_generate_page.dart';
@@ -42,6 +43,7 @@ class AppRouter {
   static const String videoGeneratePage = '/generate/video';
   static const String wearEvaluatePage = '/generate/wear';
   static const String tryOnGeneratePage = '/generate/tryon';
+  static const String animeGeneratePage = '/generate/anime';
   static const String generateResultPage = '/generate/result';
 
   static const String favoritePage = '/favorite';
@@ -69,6 +71,7 @@ class AppRouter {
     selectModelPage: () => const ModelSelectPage(),
     viewGenerateExamplePage: () => const ViewGenerateExamplePage(),
     soloGeneratePage: () => const SoloGeneratePage(),
+    animeGeneratePage: () => const AnimeGeneratePage(),
     multiGeneratePage: () => const MultiGeneratePage(),
     videoGeneratePage: () => const VideoGeneratePage(),
     wearEvaluatePage: () => const WearEvaluationPage(),

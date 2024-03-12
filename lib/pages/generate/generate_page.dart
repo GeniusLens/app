@@ -132,7 +132,7 @@ class _GenerateListState extends State<_GenerateList>
   bool get wantKeepAlive => true;
 
   String? _buildRoute(CategoryVO item) {
-    if (item.name == "动态写真") {
+    if (item.name == "AI变身") {
       return AppRouter.videoGeneratePage;
     }
     if (item.name == "换装") {

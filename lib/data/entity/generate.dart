@@ -28,8 +28,10 @@ class FunctionVO {
   final String? description;
   final String? url;
   final String type;
+  final int? peopleCount;
 
-  FunctionVO(this.id, this.name, this.description, this.url, this.type);
+  FunctionVO(this.id, this.name, this.description, this.url, this.type,
+      this.peopleCount);
 
   factory FunctionVO.fromJson(Map<String, dynamic> json) =>
       _$FunctionVOFromJson(json);
@@ -40,10 +42,30 @@ class FunctionVO {
   String toString() {
     return toJson().toString();
   }
+
+  // copyWith
+  FunctionVO copyWith({
+    int? id,
+    String? name,
+    String? description,
+    String? url,
+    String? type,
+    int? peopleCount,
+  }) {
+    return FunctionVO(
+      id ?? this.id,
+      name ?? this.name,
+      description ?? this.description,
+      url ?? this.url,
+      type ?? this.type,
+      peopleCount ?? this.peopleCount,
+    );
+  }
 }
 
 @JsonSerializable()
 class LoraVO {
+  final int id;
   final String? name;
   final String? description;
 
@@ -53,6 +75,7 @@ class LoraVO {
   final int status;
 
   LoraVO(
+    this.id,
     this.name,
     this.description,
     this.avatar,

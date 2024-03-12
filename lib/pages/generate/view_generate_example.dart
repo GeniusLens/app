@@ -1,6 +1,7 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,8 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
   late final FunctionVO function;
   late final SwiperController _swiperCtrl;
   final List<String> _images = [];
+
+  bool _showFab = false;
 
   @override
   void initState() {
@@ -38,20 +41,45 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
     print(_images);
 
     _swiperCtrl = SwiperController();
+
+    if (function.type == 'scene') {
+      _showFab = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(function.name ?? ''),
+        title: Text(
+          '选择示例',
+          style: TextStyle(color: context.theme.primaryColor, fontSize: 20),
+        ),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         actions: [
           GestureDetector(
             onTap: () {
-              Get.toNamed(AppRouter.soloGeneratePage, arguments: function);
+              var route = '';
+              switch (function.type) {
+                case 'solo' || 'dynamic-solo':
+                  route = AppRouter.soloGeneratePage;
+                  break;
+                case 'multi':
+                  route = AppRouter.multiGeneratePage;
+                  break;
+                case 'scene':
+                  route = AppRouter.soloGeneratePage;
+                  break;
+                default:
+                  EasyLoading.showError('未知的生成类型');
+              }
+              // 将function的url修改为当前图片的url
+              Get.toNamed(
+                route,
+                arguments: function.copyWith(url: _images[_swiperCtrl.index]),
+              );
             },
             child: Container(
               decoration: BoxDecoration(
@@ -65,7 +93,7 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
                   )
                 ],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               margin: const EdgeInsets.only(right: 16),
               child: const Text(
                 '一键生成',
@@ -76,23 +104,53 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
         ],
       ),
       body: Column(children: [
+        // Container(
+        //   padding: const EdgeInsets.symmetric(horizontal: 16),
+        //   child: Row(
+        //     children: [
+        //       const Spacer(),
+        //       Text(
+        //         '选择图片',
+        //         style: TextStyle(
+        //           color: context.theme.primaryColor,
+        //           fontSize: 16,
+        //         ),
+        //       ),
+        //       const Spacer(),
+        //     ],
+        //   ),
+        // ),
         Expanded(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             child: Swiper(
               itemBuilder: (BuildContext context, int index) {
-                return ExtendedImage.network(
-                  _images[index],
-                  fit: BoxFit.fitWidth,
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 32),
+                  child: ExtendedImage.network(
+                    _images[index],
+                    fit: BoxFit.cover,
+                  ),
                 );
               },
               loop: false,
               itemCount: _images.length,
               controller: _swiperCtrl,
-              pagination: const SwiperPagination(
-                margin: EdgeInsets.only(bottom: 4),
+              pagination: SwiperPagination(
+                margin: const EdgeInsets.only(bottom: 4),
+                builder: DotSwiperPaginationBuilder(
+                  color: Colors.black12,
+                  activeColor: context.theme.primaryColor,
+                ),
               ),
-              control: const SwiperControl(),
+              onIndexChanged: (index) {
+                _swiperCtrl.move(index);
+              },
+              control: SwiperControl(
+                color: context.theme.primaryColor,
+                size: 24,
+                padding: const EdgeInsets.all(8),
+              ),
             ),
           ),
         ),
@@ -133,13 +191,27 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
                 ),
               );
             },
+            onIndexChanged: (index) {
+              _swiperCtrl.move(index);
+            },
             loop: false,
-            viewportFraction: (_images.length > 2) ? 0.3 : 1,
+            viewportFraction: (_images.length > 1) ? 0.3 : 1,
             itemCount: _images.length,
             controller: _swiperCtrl,
           ),
         )
       ]),
+      floatingActionButton: _showFab
+          ? FloatingActionButton(
+              onPressed: () {
+                EasyLoading.showError('点击此处上传自定义图片');
+              },
+              backgroundColor: context.theme.primaryColor,
+              foregroundColor: Colors.white,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

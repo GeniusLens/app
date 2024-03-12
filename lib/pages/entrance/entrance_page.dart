@@ -360,7 +360,7 @@ class _AIModelItem extends StatelessWidget {
               ],
             ),
             child: Text(
-              lora.name ?? '',
+              lora.description ?? '',
               style: TextStyle(fontSize: 14, color: Colors.grey[800]),
             ),
           ),

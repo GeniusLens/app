@@ -19,6 +19,7 @@ class SoloGeneratePage extends StatefulWidget {
 
 class _SoloGeneratePageState extends State<SoloGeneratePage> {
   late final FunctionVO function;
+  late final String _imageUrl;
   final List<LoraVO> _loras = [];
   int _index = 0;
   bool _submitting = false;
@@ -43,7 +44,10 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(function.name ?? ''),
+        title: Text(
+          '选择分身',
+          style: TextStyle(color: context.theme.primaryColor, fontSize: 20),
+        ),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -122,7 +126,8 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                             setState(() => _index = _loras.length - 1);
                           }
                         },
-                        icon: const Icon(Icons.chevron_left, size: 48),
+                        icon: const Icon(Icons.chevron_left,
+                            size: 48, color: Colors.grey),
                       ),
                     ),
                     AnimatedContainer(
@@ -172,7 +177,8 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                             setState(() => _index = 0);
                           }
                         },
-                        icon: const Icon(Icons.chevron_right, size: 48),
+                        icon: const Icon(Icons.chevron_right,
+                            size: 48, color: Colors.grey),
                       ),
                     ),
                   ],
@@ -219,10 +225,33 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   if (_loras.isEmpty) {
                     return;
                   }
-                  // if (_selected == -1) {
-                  //   EasyLoading.showToast('请选择一个Lora模型');
-                  //   return;
-                  // }
+                  // 弹窗确认
+                  var result = await Get.dialog(
+                    AlertDialog(
+                      title: const Text('确认生成'),
+                      content: const Text('确认生成任务吗？'),
+                      surfaceTintColor: context.theme.scaffoldBackgroundColor,
+                      backgroundColor: context.theme.cardColor,
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back(result: false);
+                          },
+                          child: const Text('取消',
+                              style: TextStyle(color: Colors.grey)),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.back(result: true);
+                          },
+                          child: const Text('确认'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (result != true) {
+                    return;
+                  }
                   setState(() {
                     _submitting = true;
                   });
@@ -236,12 +265,11 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   );
                   if (id == null) {
                     EasyLoading.showToast('生成失败');
+                    setState(() => _submitting = false);
                     return;
                   }
                   var task = await GenerateApi.getTaskInfo(id);
-                  setState(() {
-                    _submitting = false;
-                  });
+                  setState(() => _submitting = false);
                   Get.offAndToNamed(AppRouter.manageTaskPage, arguments: task);
                 },
                 child: Container(

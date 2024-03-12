@@ -77,15 +77,15 @@ class _WearEvaluationPageState extends State<WearEvaluationPage>
           // margin: const EdgeInsets.only(bottom: 172),
           children: [
             const Spacer(),
-            if (_imageUrl == null && !_thingking)
-              Expanded(
-                child: Center(
-                  child: LoadingAnimationWidget.beat(
-                    color: context.theme.primaryColor,
-                    size: 42,
-                  ),
-                ),
-              ),
+            // if (_imageUrl == null && !_thingking)
+            //   Expanded(
+            //     child: Center(
+            //       child: LoadingAnimationWidget.beat(
+            //         color: context.theme.primaryColor,
+            //         size: 42,
+            //       ),
+            //     ),
+            //   ),
             if (_imageUrl != null)
               FlipCard(
                 direction: FlipDirection.HORIZONTAL,

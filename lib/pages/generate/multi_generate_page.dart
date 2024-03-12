@@ -27,6 +27,21 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
     });
   }
 
+  bool _showBtn() {
+    if (_selected.isEmpty) {
+      return false;
+    }
+    // 遍历_selected，统计为true的个数
+    var count = 0;
+    _selected.forEach((key, value) {
+      if (value) {
+        count++;
+      }
+    });
+    print('Count: $count, PeopleCount: ${function.peopleCount}');
+    return count == function.peopleCount;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +61,26 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
       body: SafeArea(
         child: Column(
           children: [
+            AnimatedOpacity(
+              opacity: _showBtn() ? 0 : 1,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Text(
+                      '请选择${function.peopleCount}个分身',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: context.theme.primaryColor,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+            ),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -67,34 +102,41 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
                     }),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                if (_selected.isEmpty) {
-                  EasyLoading.showToast('请选择一个分身');
-                  return;
-                }
-                GenerateApi.submitTask(f: function, lora: _loras, images: [
-                  "https://image.thuray.xyz/2024/03/7a0806fe815131850a4b0b5cb8d311e1.png",
-                ]);
-                Get.offNamed(AppRouter.manageTaskPage);
-              },
-              child: Container(
-                height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                decoration: BoxDecoration(
-                  color: context.theme.primaryColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
+            AnimatedOpacity(
+              opacity: _showBtn() ? 1 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: GestureDetector(
+                onTap: () {
+                  if (_selected.isEmpty) {
+                    EasyLoading.showToast('请选择一个分身');
+                    return;
+                  }
+                  GenerateApi.submitTask(f: function, lora: _loras, images: [
+                    "https://image.thuray.xyz/2024/03/7a0806fe815131850a4b0b5cb8d311e1.png",
+                  ]);
+                  Get.offNamed(AppRouter.manageTaskPage);
+                },
+                child: Container(
+                  height: 48,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.theme.primaryColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '生成',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
-                  ],
-                ),
-                child: const Center(
-                  child: Text('生成',
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                  ),
                 ),
               ),
             ),
@@ -127,15 +169,15 @@ class _MultiGenerateItem extends StatelessWidget {
             ).image,
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    model.name ?? '',
+                    model.description ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 Checkbox(

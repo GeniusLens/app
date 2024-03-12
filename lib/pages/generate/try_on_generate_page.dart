@@ -29,6 +29,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   final List<String> _images = [
     "https://integrity-backend.sduonline.cn/files/d7d1887a-e1ff-419c-91a3-b4c36e1fb2e9.jpg"
   ];
+  final List<String> _results = [];
   final List<ClothVO> _clothes = [];
   bool _waiting = false;
 
@@ -54,12 +55,11 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
         // 处理成功情况
         // 按照,分割并去掉最后一个空字符串
         task = result;
-        var resultList = task!.result!.split(',').sublist(0, 3);
+        var resultList = task!.result!.split(',');
         setState(() {
           _waiting = false;
-          // 移除第一个元素以外的所有元素
-          _images.removeRange(1, _images.length);
-          _images.addAll(resultList);
+          _results.clear();
+          _results.addAll(resultList);
         });
       }
     });
@@ -92,11 +92,21 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   }
 
   @override
+  void dispose() {
+    // 及时销毁定时器
+    if (_taskId != null) {
+      Timer.periodic(const Duration(seconds: 1), (timer) {});
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_category.name),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
           GestureDetector(
@@ -118,6 +128,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 images: images,
                 clothId: _clothes[_selected].id,
               );
+              print('Result Id: $result');
               if (result == null) {
                 EasyLoading.showToast('提交失败');
                 return;
@@ -286,100 +297,224 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
           children: [
             Expanded(
               child: Swiper(
-                itemCount: _images.length,
+                itemCount: 2,
+                scrollDirection: Axis.vertical,
                 loop: false,
-                scale: 0.8,
-                viewportFraction: 0.7,
-                pagination: SwiperPagination(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  builder: DotSwiperPaginationBuilder(
-                    color: Colors.grey[300]!,
-                    activeColor: Theme.of(context).primaryColor,
-                    activeSize: 8,
-                    size: 8,
-                  ),
+                control: SwiperControl(
+                  color: context.theme.primaryColor,
+                  disableColor: Colors.grey[400]!,
+                  size: 24,
                 ),
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 36),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: context.theme.cardColor,
-                      border: (index == 0 && !_waiting)
-                          ? Border.all(
-                              color: Theme.of(context).primaryColor,
-                              width: 2,
-                            )
-                          : null,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey[300]!,
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: ExtendedImage.network(
-                              _images[index],
-                              loadStateChanged: (state) {
-                                if (state.extendedImageLoadState ==
-                                    LoadState.loading) {
-                                  return Center(
-                                    child:
-                                        LoadingAnimationWidget.prograssiveDots(
-                                      color: context.theme.primaryColor,
-                                      size: 32,
-                                    ),
-                                  );
-                                } else if (state.extendedImageLoadState ==
-                                    LoadState.failed) {
-                                  return const Center(
-                                    child: Icon(Icons.error),
-                                  );
-                                }
-                                return null;
-                              },
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        // 加载时添加一个蒙版
-                        AnimatedOpacity(
-                          opacity: _waiting ? 0.5 : 0.0,
-                          duration: const Duration(milliseconds: 300),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
+                  if (index == 0) {
+                    return _buildModelLevel(context);
+                  } else {
+                    return _buildResultLevel(context);
+                  }
                 },
               ),
             ),
-            // if (_waiting)
-            // Container(
-            //   padding: const EdgeInsets.all(8),
-            //   margin: const EdgeInsets.only(bottom: 8),
-            //   child: const LinearProgressIndicator(),
-            // ),
-            const SizedBox(height: 280),
+            const SizedBox(height: 294),
           ],
         ),
       ),
+    );
+  }
+
+  Swiper _buildModelLevel(BuildContext context) {
+    return Swiper(
+      itemCount: _images.length + 1,
+      loop: false,
+      scale: 0.8,
+      viewportFraction: 0.7,
+      onIndexChanged: (index) => setState(() => _selected = index),
+      itemBuilder: (context, index) {
+        if (index == _images.length) {
+          return Center(
+            child: GestureDetector(
+              onTap: () async {
+                var file = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                );
+                if (file != null) {
+                  EasyLoading.show(status: '上传中...');
+                  var upload = await CommonAPi.uploadFile(file.path);
+                  if (upload != null) {
+                    setState(() {
+                      _images.add(upload);
+                    });
+                    EasyLoading.dismiss();
+                    EasyLoading.showToast('上传成功');
+                  }
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.theme.cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: context.theme.primaryColor,
+                  size: 64,
+                ),
+              ),
+            ),
+          );
+        }
+        return Container(
+          margin: const EdgeInsets.only(bottom: 32, top: 32),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: context.theme.cardColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey[300]!,
+                blurRadius: 8,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: ExtendedImage.network(
+                    _images[index],
+                    loadStateChanged: (state) {
+                      if (state.extendedImageLoadState == LoadState.loading) {
+                        return Center(
+                          child: LoadingAnimationWidget.prograssiveDots(
+                            color: context.theme.primaryColor,
+                            size: 32,
+                          ),
+                        );
+                      } else if (state.extendedImageLoadState ==
+                          LoadState.failed) {
+                        return const Center(
+                          child: Icon(Icons.error),
+                        );
+                      }
+                      return null;
+                    },
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // 加载时添加一个蒙版
+              AnimatedOpacity(
+                opacity: _waiting ? 0.5 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Swiper _buildResultLevel(BuildContext context) {
+    return Swiper(
+      itemCount: (_results.isEmpty) ? 1 : _results.length,
+      loop: false,
+      scale: 0.8,
+      viewportFraction: 0.7,
+      itemBuilder: (context, index) {
+        if (_results.isEmpty) {
+          if (_waiting) {
+            return Center(
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: context.theme.primaryColor,
+                size: 48,
+              ),
+            );
+          } else {
+            return const Center(
+              child: Text(
+                '暂无结果',
+                style: TextStyle(fontSize: 18),
+              ),
+            );
+          }
+        }
+        return Container(
+          margin: const EdgeInsets.only(bottom: 32, top: 32),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: context.theme.cardColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey[300]!,
+                blurRadius: 8,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: ExtendedImage.network(
+                    _results[index],
+                    loadStateChanged: (state) {
+                      if (state.extendedImageLoadState == LoadState.loading) {
+                        return Center(
+                          child: LoadingAnimationWidget.prograssiveDots(
+                            color: context.theme.primaryColor,
+                            size: 32,
+                          ),
+                        );
+                      } else if (state.extendedImageLoadState ==
+                          LoadState.failed) {
+                        return const Center(
+                          child: Icon(Icons.error),
+                        );
+                      }
+                      return null;
+                    },
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // 加载时添加一个蒙版
+              AnimatedOpacity(
+                opacity: _waiting ? 0.5 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }

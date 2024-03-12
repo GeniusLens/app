@@ -1,6 +1,7 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
@@ -245,13 +246,20 @@ class _ModelItem extends StatelessWidget {
   }
 }
 
-class _InfoCard extends StatelessWidget {
+class _InfoCard extends StatefulWidget {
   const _InfoCard({required this.model});
 
   final LoraVO model;
 
+  @override
+  State<_InfoCard> createState() => _InfoCardState();
+}
+
+class _InfoCardState extends State<_InfoCard> {
+  final TextEditingController _controller = TextEditingController();
+
   Color _buildColor() {
-    switch (model.status) {
+    switch (widget.model.status) {
       case 1:
         return Colors.orange;
       case 2:
@@ -263,6 +271,12 @@ class _InfoCard extends StatelessWidget {
       default:
         return Colors.grey;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = widget.model.description ?? '';
   }
 
   @override
@@ -290,7 +304,7 @@ class _InfoCard extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  model.name ?? '',
+                  widget.model.description ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -342,11 +356,19 @@ class _InfoCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             decoration: BoxDecoration(
                               color: context.theme.scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: TextField(
+                              controller: _controller,
                               decoration: const InputDecoration(
-                                labelText: '名称',
+                                // labelText: '名称',
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
                               ),
@@ -354,8 +376,19 @@ class _InfoCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
-                            onTap: () {
-                              // TODO
+                            onTap: () async {
+                              String name = _controller.text;
+                              if (name.isEmpty) {
+                                EasyLoading.showError('名称不能为空');
+                                return;
+                              }
+                              var result = await GenerateApi.updateLora(
+                                  id: widget.model.id, name: name);
+                              if (result != null) {
+                                EasyLoading.showSuccess('修改成功');
+                              } else {
+                                EasyLoading.showError('修改失败');
+                              }
                               Get.back();
                             },
                             child: Container(
@@ -412,8 +445,14 @@ class _InfoCard extends StatelessWidget {
                                 style: TextStyle(color: Colors.grey)),
                           ),
                           TextButton(
-                            onPressed: () {
-                              // TODO: 删除AI分身
+                            onPressed: () async {
+                              var result =
+                                  await GenerateApi.deleteLora(widget.model.id);
+                              if (result) {
+                                EasyLoading.showSuccess('删除成功');
+                              } else {
+                                EasyLoading.showError('删除失败');
+                              }
                               Get.back();
                             },
                             child: const Text('确定'),
@@ -428,9 +467,9 @@ class _InfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(model.description ?? '',
-              style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 8),
+          // Text(model.description ?? '',
+          //     style: const TextStyle(color: Colors.grey)),
+          // const SizedBox(height: 8),
         ],
       ),
     );

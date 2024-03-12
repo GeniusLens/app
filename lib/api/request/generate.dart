@@ -65,6 +65,24 @@ class GenerateApi {
     return list;
   }
 
+  static Future<bool> deleteLora(int id) async {
+    var response = await HttpUtil.delete('$_prefix/lora/$id');
+    var wrapper = Result.fromJson(response.data);
+    return wrapper.code == '200';
+  }
+
+  static Future<LoraVO?> updateLora({
+    int? id,
+    String? name,
+  }) async {
+    var response = await HttpUtil.post('$_prefix/lora/edit', data: {
+      'id': id,
+      'name': name,
+    });
+    var wrapper = Result.fromJson(response.data);
+    return wrapper.code == '200' ? LoraVO.fromJson(wrapper.data) : null;
+  }
+
   static Future<List<SampleVO>> getSamples(int functionId) async {
     var response = await HttpUtil.get('$_prefix/function/sample',
         queryParameters: {'id': functionId});
@@ -93,11 +111,10 @@ class GenerateApi {
       'clothId': clothId,
     });
     var wrapper = Result.fromJson(response.data);
-    return (type == 1)
-        ? wrapper.data['id'] as int
-        : wrapper.code == '200'
-            ? 1
-            : null;
+
+    return (type != null && type == 2)
+        ? (wrapper.code == '200' ? 1 : null)
+        : wrapper.data['id'] as int?;
   }
 
   static Future<List<TaskVO>> getTaskList() async {
