@@ -162,6 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                   } on WrongPasswordException catch (e) {
                     EasyLoading.showError(e.message);
                   } catch (e) {
+                    e.printError();
                     EasyLoading.showError('登录失败');
                   }
                 },

@@ -1,10 +1,9 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:genius_lens/api/request/generate.dart';
+import 'package:genius_lens/api/request/community.dart';
 import 'package:genius_lens/constants.dart';
 import 'package:genius_lens/data/entity/community.dart';
-import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/provider/community_provider.dart';
 import 'package:genius_lens/utils/debug_util.dart';
 import 'package:get/get.dart';
@@ -19,6 +18,16 @@ class CommunityDetailPage extends StatefulWidget {
 
 class _CommunityDetailPageState extends State<CommunityDetailPage> {
   CommunityVO? _content;
+  final List<CommentVO> _comments = [];
+  final TextEditingController _commentController = TextEditingController();
+
+  Future<void> _loadData() async {
+    var result = await CommunityApi().getComments(_content!.id);
+    setState(() {
+      _comments.clear();
+      _comments.addAll(result);
+    });
+  }
 
   Widget _buildAppBarHeader() {
     return Row(
@@ -58,12 +67,12 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   @override
   void initState() {
     super.initState();
+    _content = context.read<CommunityProvider>().community;
+    _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    _content = context.watch<CommunityProvider>().community;
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -211,9 +220,57 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               ),
             ),
           ),
-          SliverList.builder(itemBuilder: (context, index) {
-            return const _CommentCard();
-          }),
+          SliverList.builder(
+              itemCount: _comments.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _comments.length) {
+                  return Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: context.theme.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey[300]!,
+                          offset: const Offset(2, 2),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundImage: ExtendedImage.network(
+                              DebugUtil.getRandomImageURL(),
+                              fit: BoxFit.cover,
+                            ).image,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _commentController,
+                            decoration: const InputDecoration(
+                              hintText: '写评论...',
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.send),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return _CommentCard(comment: _comments[index]);
+              }),
         ],
       ),
     );
@@ -221,7 +278,9 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 }
 
 class _CommentCard extends StatelessWidget {
-  const _CommentCard();
+  const _CommentCard({super.key, required this.comment});
+
+  final CommentVO comment;
 
   @override
   Widget build(BuildContext context) {
@@ -246,13 +305,13 @@ class _CommentCard extends StatelessWidget {
               CircleAvatar(
                 radius: 16,
                 backgroundImage: ExtendedImage.network(
-                  DebugUtil.getRandomImageURL(),
+                  comment.userAvatar ?? DebugUtil.getRandomImageURL(),
                   fit: BoxFit.cover,
                 ).image,
               ),
               const SizedBox(width: 8),
               Text(
-                '用户名',
+                comment.userName ?? '用户名',
                 style: TextStyle(
                   fontSize: Constants.captionSize,
                   color: Colors.grey[800],
@@ -263,7 +322,7 @@ class _CommentCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '评论内容',
+            comment.content ?? '评论内容',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[800],
@@ -273,7 +332,7 @@ class _CommentCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                '时间',
+                comment.time ?? '时间',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],
@@ -281,7 +340,7 @@ class _CommentCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '点赞数',
+                comment.likeCount?.toString() ?? '0',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],

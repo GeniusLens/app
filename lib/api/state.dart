@@ -1,4 +1,5 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:genius_lens/utils/shared_preference_util.dart';
 
 class ApiState {
   String? _token;
@@ -11,13 +12,16 @@ class ApiState {
 
   ApiState._internal();
 
+  // init
+  Future<void> init() async {
+    _token = await SharedPreferenceUtil().getData('token');
+  }
+
   get isLogin => _token != null;
 
   get isNotLogin => _token == null;
 
   get tokenValue => _token;
-
-  void initialize() async {}
 
   void updateToken(String token) {
     _token = token;

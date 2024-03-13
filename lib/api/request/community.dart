@@ -18,4 +18,16 @@ class CommunityApi {
 
     return list;
   }
+
+  Future<List<CommentVO>> getComments(int postId) async {
+    List<CommentVO> list = [];
+
+    var response = await HttpUtil.get('$_prefix/post/comment/$postId');
+    var wrapper = Result.fromJson(response.data);
+    for (var item in wrapper.data) {
+      list.add(CommentVO.fromJson(item));
+    }
+
+    return list;
+  }
 }

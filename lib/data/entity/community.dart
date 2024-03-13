@@ -48,3 +48,32 @@ class CommunityVO {
     return toJson().toString();
   }
 }
+
+@JsonSerializable()
+class CommentVO {
+  final int? id;
+  final String? userName;
+  final String? userAvatar;
+  final String? content;
+  final String? time;
+  final int? likeCount;
+
+  CommentVO({
+    required this.id,
+    required this.userName,
+    required this.userAvatar,
+    required this.content,
+    required this.time,
+    required this.likeCount,
+  });
+
+  factory CommentVO.fromJson(Map<String, dynamic> json) =>
+      _$CommentVOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CommentVOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+}

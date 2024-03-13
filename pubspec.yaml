@@ -50,6 +50,7 @@ dependencies:
   flip_card: ^0.7.0
   flutter_staggered_animations: ^1.1.1
   animations: ^2.0.11
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:genius_lens/api/state.dart';
 import 'package:genius_lens/data/entity/result.dart';
 import 'package:genius_lens/data/exception/api_exception.dart';
+import 'package:genius_lens/utils/shared_preference_util.dart';
 
 import '../../data/entity/user.dart';
 import '../http.dart';
@@ -25,6 +26,12 @@ class UserApi {
       throw WrongPasswordException(wrapper.msg);
     }
     String token = wrapper.data['token'];
+    // 将token保存到本地
+    await SharedPreferenceUtil().saveData('token', token);
+    // 检查是否保存成功
+    if (await SharedPreferenceUtil().getData('token') != token) {
+      print('Token save failed');
+    }
     ApiState().updateToken(token);
     UserVO user = UserVO.fromJson(wrapper.data['user']);
     return user;

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:genius_lens/api/state.dart';
 import 'package:genius_lens/provider/community_provider.dart';
 import 'package:genius_lens/provider/user_provider.dart';
 import 'package:genius_lens/router.dart';
@@ -20,6 +21,7 @@ void main() async {
         statusBarIconBrightness: Brightness.light);
     SystemChrome.setSystemUIOverlayStyle(style);
   }
+  ApiState().init();
   runApp(const MyApp());
   await PackageUtil().initialize();
   EasyLoading.instance.loadingStyle = EasyLoadingStyle.light;
