@@ -1,5 +1,6 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:genius_lens/pages/common/image_preview_page.dart';
 import 'package:genius_lens/pages/community/community_page.dart';
 import 'package:genius_lens/pages/community/detail_page.dart';
 import 'package:genius_lens/pages/entrance/model_create_page.dart';
@@ -33,6 +34,7 @@ class AppRouter {
   static const String register = '/register';
 
   static const String mainPage = '/main';
+  static const String imagePreviewPage = '/image/preview';
 
   static const String modelCreatePage = '/model/create';
   static const String selectModelPage = '/model/select';
@@ -67,6 +69,7 @@ class AppRouter {
     login: () => const LoginPage(),
     register: () => const Text('Register'),
     mainPage: () => const Text('Main'),
+    imagePreviewPage: () => const ImagePreviewPage(),
     modelCreatePage: () => const ModelCreatePage(),
     selectModelPage: () => const ModelSelectPage(),
     viewGenerateExamplePage: () => const ViewGenerateExamplePage(),

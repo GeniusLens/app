@@ -6,6 +6,7 @@ import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class EntrancePage extends StatefulWidget {
   const EntrancePage({super.key});
@@ -80,6 +81,18 @@ class _Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<_Header> {
+  final List<String> _banners = [
+    "https://image.thuray.xyz/2024/03/ad303a2cd35befd12e36e78ec646e264.PNG",
+    "https://image.thuray.xyz/2024/03/6d8db2b3474e948ef52b92775ae6d5ba.PNG",
+    "https://image.thuray.xyz/2024/03/a4e23f3183fb9312dfd75a3c5cebc99f.PNG",
+  ];
+
+  final List<String> _details = [
+    "https://image.thuray.xyz/2024/03/8e0dd2df5a0277e4cee014821bed98fd.PNG",
+    "https://image.thuray.xyz/2024/03/629c46917a3c820bc115498f800cd077.PNG",
+    "https://image.thuray.xyz/2024/03/fbdf0230f584e1cb63ffee8e28228b2b.PNG",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -94,10 +107,31 @@ class _HeaderState extends State<_Header> {
           child: SizedBox(
             height: 224,
             child: Swiper(
-              itemCount: 3,
+              itemCount: _banners.length,
+              onTap: (index) {
+                // 弹出图片预览
+                Get.toNamed(AppRouter.imagePreviewPage,
+                    arguments: _details[index]);
+              },
               itemBuilder: (BuildContext context, int index) {
                 return ExtendedImage.network(
-                  "https://picsum.photos/600/300?random=$index",
+                  _banners[index],
+                  loadStateChanged: (state) {
+                    if (state.extendedImageLoadState == LoadState.loading) {
+                      return Center(
+                        child: LoadingAnimationWidget.horizontalRotatingDots(
+                          color: context.theme.primaryColor,
+                          size: 24,
+                        ),
+                      );
+                    } else if (state.extendedImageLoadState ==
+                        LoadState.failed) {
+                      return const Center(
+                        child: Icon(Icons.error),
+                      );
+                    }
+                    return null;
+                  },
                   fit: BoxFit.cover,
                 );
               },
@@ -106,8 +140,8 @@ class _HeaderState extends State<_Header> {
                 builder: DotSwiperPaginationBuilder(
                   size: 8,
                   activeSize: 8,
-                  color: Colors.grey[300],
-                  activeColor: Colors.grey[800],
+                  color: Colors.grey[500],
+                  activeColor: context.theme.primaryColor,
                 ),
               ),
             ),
