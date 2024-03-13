@@ -15,7 +15,7 @@ class EntrancePage extends StatefulWidget {
 }
 
 class _EntrancePageState extends State<EntrancePage> {
-  final List<String> _labels = ["热门", "最新", "推荐"];
+  final List<String> _labels = ["热门"];
   final List<FunctionVO> _functions = [];
 
   Future<void> _loadFunctions() async {
@@ -435,7 +435,9 @@ class _TemplateItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         image: DecorationImage(
           image: ExtendedImage.network(
-            function.url!,
+            function.url!.contains(',')
+                ? function.url!.split(',')[0]
+                : function.url!,
             cache: true,
             loadStateChanged: (state) {
               if (state.extendedImageLoadState == LoadState.loading) {

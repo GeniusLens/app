@@ -26,14 +26,14 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   int? _taskId;
   TaskVO? task;
   final GlobalKey _panelKey = GlobalKey();
-  final List<String> _images = [
-    "https://integrity-backend.sduonline.cn/files/d7d1887a-e1ff-419c-91a3-b4c36e1fb2e9.jpg"
-  ];
-  final List<String> _results = [];
+  final List<ModelVO> _models = [];
   final List<ClothVO> _clothes = [];
+  final List<String> _results = [];
   bool _waiting = false;
+  late final SwiperController _swiperCtrl;
 
-  int _selected = -1;
+  int _selectedCloth = -1;
+  int _selectedModel = -1;
 
   void _loadTask() {
     // 轮询获取结果
@@ -61,6 +61,9 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
           _results.clear();
           _results.addAll(resultList);
         });
+        if (_swiperCtrl.index == 0) {
+          _swiperCtrl.next();
+        }
       }
     });
   }
@@ -70,6 +73,14 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
     setState(() {
       _clothes.clear();
       _clothes.addAll(data);
+    });
+  }
+
+  Future<void> _loadModels() async {
+    var data = await CommonAPi.getModels();
+    setState(() {
+      _models.clear();
+      _models.addAll(data);
     });
   }
 
@@ -87,6 +98,8 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   void initState() {
     super.initState();
     _category = Get.arguments as CategoryVO;
+    _swiperCtrl = SwiperController();
+    _loadModels();
     _loadFunction();
     _loadClothes();
   }
@@ -115,18 +128,18 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 EasyLoading.showToast('正在试穿中');
                 return;
               }
-              if (_selected == -1) {
+              if (_selectedCloth == -1) {
                 EasyLoading.showToast('请选择衣服');
                 return;
               }
               setState(() => _waiting = true);
               List<String> images = [];
-              images.add(_images[0]);
-              images.add(_clothes[_selected].url!);
+              images.add(_models[_selectedModel].url!);
+              images.add(_clothes[_selectedCloth].url!);
               var result = await GenerateApi.submitTask(
                 f: _function,
                 images: images,
-                clothId: _clothes[_selected].id,
+                clothId: _clothes[_selectedCloth].id,
               );
               print('Result Id: $result');
               if (result == null) {
@@ -217,7 +230,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                               _clothes.add(ClothVO(
                                 url: upload,
                               ));
-                              _selected = _clothes.length - 1;
+                              _selectedCloth = _clothes.length - 1;
                             });
                             EasyLoading.dismiss();
                             EasyLoading.showToast('上传成功');
@@ -248,17 +261,17 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                       onTap: () {
                         setState(() {
                           if (_waiting) return;
-                          if (_selected == index) {
-                            _selected = -1;
+                          if (_selectedCloth == index) {
+                            _selectedCloth = -1;
                           } else {
-                            _selected = index;
+                            _selectedCloth = index;
                           }
                         });
                       },
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          border: (_selected == index)
+                          border: (_selectedCloth == index)
                               ? Border.all(
                                   color: Theme.of(context).primaryColor,
                                   width: 2,
@@ -297,7 +310,8 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
           children: [
             Expanded(
               child: Swiper(
-                itemCount: 2,
+                controller: _swiperCtrl,
+                itemCount: 1 + (_results.isEmpty ? 0 : 1),
                 scrollDirection: Axis.vertical,
                 loop: false,
                 control: SwiperControl(
@@ -323,13 +337,13 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
 
   Swiper _buildModelLevel(BuildContext context) {
     return Swiper(
-      itemCount: _images.length + 1,
+      itemCount: _models.length + 1,
       loop: false,
       scale: 0.8,
       viewportFraction: 0.7,
-      onIndexChanged: (index) => setState(() => _selected = index),
+      onIndexChanged: (index) => setState(() => _selectedModel = index),
       itemBuilder: (context, index) {
-        if (index == _images.length) {
+        if (index == _models.length) {
           return Center(
             child: GestureDetector(
               onTap: () async {
@@ -341,7 +355,9 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                   var upload = await CommonAPi.uploadFile(file.path);
                   if (upload != null) {
                     setState(() {
-                      _images.add(upload);
+                      _models.add(ModelVO(
+                        url: upload,
+                      ));
                     });
                     EasyLoading.dismiss();
                     EasyLoading.showToast('上传成功');
@@ -393,7 +409,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: ExtendedImage.network(
-                    _images[index],
+                    _models[index].url!,
                     loadStateChanged: (state) {
                       if (state.extendedImageLoadState == LoadState.loading) {
                         return Center(

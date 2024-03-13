@@ -53,3 +53,26 @@ class ClothVO {
     return toJson().toString();
   }
 }
+
+@JsonSerializable()
+class ModelVO {
+  int? id;
+  String? name;
+  String? url;
+
+  ModelVO({
+    this.id,
+    this.name,
+    this.url,
+  });
+
+  factory ModelVO.fromJson(Map<String, dynamic> json) =>
+      _$ModelVOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ModelVOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+}

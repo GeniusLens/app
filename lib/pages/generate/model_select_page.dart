@@ -71,7 +71,7 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
             : Center(
                 child: LoadingAnimationWidget.fourRotatingDots(
                   color: context.theme.primaryColor,
-                  size: 48,
+                  size: 36,
                 ),
               ),
       ),

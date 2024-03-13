@@ -45,4 +45,14 @@ class CommonAPi {
     }
     return list;
   }
+
+  static Future<List<ModelVO>> getModels() async {
+    var response = await HttpUtil.get("$_prefix/model");
+    var wrapper = Result.fromJson(response.data);
+    List<ModelVO> list = [];
+    for (var item in wrapper.data) {
+      list.add(ModelVO.fromJson(item));
+    }
+    return list;
+  }
 }

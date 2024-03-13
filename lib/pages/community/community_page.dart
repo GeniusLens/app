@@ -136,7 +136,7 @@ class _CommunityPageState extends State<CommunityPage>
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _buildBarText('推荐', 0),
-            _buildBarText('热门', 1),
+            // _buildBarText('热门', 1),
           ],
         ),
         actions: const [
