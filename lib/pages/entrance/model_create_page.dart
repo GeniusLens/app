@@ -617,7 +617,7 @@ class _BasePageState extends State<_BasePage> {
           ),
         ),
         Container(
-          height: 96 + 16 * 2,
+          height: 156,
           padding: const EdgeInsets.all(16),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -627,11 +627,10 @@ class _BasePageState extends State<_BasePage> {
                 margin: const EdgeInsets.only(right: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        width: 96,
-                        height: 96,
+                      child: Container(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: ExtendedImage.network(
@@ -639,17 +638,21 @@ class _BasePageState extends State<_BasePage> {
                                 ? widget.goodSamples[index]
                                 : widget.badSamples[
                                     index - widget.goodSamples.length],
-                            cache: true,
+                            // cache: true,
+                            width: 96,
+                            height: 96,
                             loadStateChanged: (state) {
                               if (state.extendedImageLoadState ==
                                   LoadState.loading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
+                                return Center(
+                                  child:
+                                      LoadingAnimationWidget.fourRotatingDots(
+                                    color: context.theme.primaryColor,
+                                    size: 32,
+                                  ),
                                 );
                               }
-                              return ExtendedRawImage(
-                                  image: state.extendedImageInfo?.image,
-                                  fit: BoxFit.cover);
+                              return null;
                             },
                             fit: BoxFit.cover,
                           ),
