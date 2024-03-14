@@ -2,8 +2,10 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../api/request/generate.dart';
@@ -19,6 +21,7 @@ class ModelSelectPage extends StatefulWidget {
 class _ModelSelectPageState extends State<ModelSelectPage> {
   late final CategoryVO category;
   final List<FunctionVO> _functions = [];
+  String? _uploadedImage;
 
   Future<void> _loadFunctions() async {
     var list = await GenerateApi.getFunctionList(category.name);
@@ -43,6 +46,45 @@ class _ModelSelectPageState extends State<ModelSelectPage> {
         backgroundColor: context.theme.scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              // 选择图片
+              var image =
+                  await ImagePicker().pickImage(source: ImageSource.gallery);
+              if (image == null) return;
+              EasyLoading.show(status: '上传中...');
+              var result = await CommonAPi.uploadFile(image.path);
+              if (result != null) {
+                setState(() {
+                  _uploadedImage = result;
+                });
+                EasyLoading.dismiss();
+                FunctionVO function = FunctionVO.custom(result);
+                Get.toNamed(AppRouter.soloGeneratePage, arguments: function);
+              } else {
+                EasyLoading.showError('上传失败');
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              margin: const EdgeInsets.only(right: 8),
+              // alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.theme.primaryColor,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: const Text('自定义', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),

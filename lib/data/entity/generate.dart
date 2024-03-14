@@ -33,6 +33,9 @@ class FunctionVO {
   FunctionVO(this.id, this.name, this.description, this.url, this.type,
       this.peopleCount);
 
+  // 自定义构造函数
+  FunctionVO.custom(url) : this(85, '自定义', '', url, '', 0);
+
   factory FunctionVO.fromJson(Map<String, dynamic> json) =>
       _$FunctionVOFromJson(json);
 
