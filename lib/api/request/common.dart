@@ -55,4 +55,14 @@ class CommonAPi {
     }
     return list;
   }
+
+  static Future<DetectVO> detect(String url) async {
+    var response =
+        await HttpUtil.post("http://chuangyi.love/photo/checkPhoto", data: {
+      "images_urls": [url],
+      "task_id": ""
+    });
+
+    return DetectVO.fromJson(response.data["data"][0]);
+  }
 }

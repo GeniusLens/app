@@ -30,7 +30,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
   final ImagePicker _imagePicker = ImagePicker();
   String? _frontImageUrl;
   bool _isFrontLoading = false;
+  bool _isFrontValid = false;
   final Map<int, bool> _isOtherLoadingMap = {};
+  final Map<int, bool> _isOtherValidMap = {};
   final List<String?> _otherImageUrls = [];
   String _name = '';
   final List<SampleVO> _samples = [];
@@ -200,8 +202,8 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     XFile? file = await _imagePicker.pickImage(
                       source: ImageSource.gallery,
                     );
-                    if (file == null) return;
                     setState(() => _isFrontLoading = true);
+                    if (file == null) return;
                     var result = await CommonAPi.uploadFile(file.path);
                     if (result == null) {
                       Get.snackbar('上传失败', '请检查网络连接或稍后重试',
@@ -209,8 +211,16 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     }
                     setState(() {
                       _frontImageUrl = result;
-                      _isFrontLoading = false;
                     });
+                    // 检查图片是否合格
+                    var detectResult = await CommonAPi.detect(result!);
+                    print(detectResult);
+                    if (detectResult.isFrontal && detectResult.isQualified) {
+                      setState(() => _isFrontValid = true);
+                    } else {
+                      setState(() => _isFrontValid = false);
+                    }
+                    setState(() => _isFrontLoading = false);
                   },
                   child: AnimatedSize(
                     duration: const Duration(milliseconds: 300),
@@ -277,6 +287,43 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     ),
                   ),
                 ),
+                // 指示图片是否合格
+                AnimatedOpacity(
+                  opacity: (_frontImageUrl == null) ? 0 : 1,
+                  duration: const Duration(milliseconds: 300),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Spacer(),
+                      if (_isFrontLoading)
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          child: LoadingAnimationWidget.horizontalRotatingDots(
+                            color: context.theme.primaryColor,
+                            size: 32,
+                          ),
+                        ),
+                      if (!_isFrontLoading)
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            _isFrontValid ? Icons.check_circle : Icons.cancel,
+                            color: _isFrontValid ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      if (!_isFrontLoading)
+                        Text(
+                          _isFrontValid ? '图片合格' : '图片不合格',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _isFrontValid ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      if (!_isFrontLoading) const SizedBox(width: 16),
+                      const Spacer(),
+                    ],
+                  ),
+                ),
                 const Spacer(),
               ],
             ),
@@ -323,10 +370,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                                       ),
                                     );
                                   }
-                                  return ExtendedRawImage(
-                                      image: state.extendedImageInfo?.image,
-                                      fit: BoxFit.cover);
+                                  return null;
                                 },
+                                width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
                             )
@@ -391,17 +437,22 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         return;
                       }
 
+                      // 处理添加图片
                       List<XFile> selected =
                           await _imagePicker.pickMultiImage();
                       if (selected.isEmpty) return;
+                      // 将新的图片添加到列表中
+                      // 允许批量添加
                       var oldLength = _otherImageUrls.length;
                       for (var file in selected) {
                         var idx = oldLength + selected.indexOf(file);
                         setState(() {
                           _isOtherLoadingMap[idx] = true;
                           _otherImageUrls.add(null);
+                          _isOtherValidMap[idx] = false;
                         });
                       }
+                      // 上传图片
                       for (var file in selected) {
                         var result = await CommonAPi.uploadFile(file.path);
                         if (result == null) {
@@ -410,6 +461,16 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         var idx = oldLength + selected.indexOf(file);
                         setState(() {
                           _otherImageUrls[idx] = result!;
+                        });
+                        // 对图片进行检测
+                        var detectResult = await CommonAPi.detect(result!);
+                        print(detectResult);
+                        if (detectResult.isQualified) {
+                          setState(() => _isOtherValidMap[idx] = true);
+                        } else {
+                          setState(() => _isOtherValidMap[idx] = false);
+                        }
+                        setState(() {
                           _isOtherLoadingMap[idx] = false;
                         });
                       }
@@ -423,20 +484,39 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        if (index < _otherImageUrls.length)
+                        // 上传中显示加载动画
+                        if (index < _otherImageUrls.length &&
+                            _otherImageUrls[index] != null &&
+                            (_isOtherLoadingMap[index] ?? true))
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 4),
+                            child:
+                                LoadingAnimationWidget.horizontalRotatingDots(
+                              color: context.theme.primaryColor,
+                              size: 16,
+                            ),
+                          ),
+                        if (index < _otherImageUrls.length &&
+                            _otherImageUrls[index] != null &&
+                            !_isOtherLoadingMap[index]!)
                           Row(
                             children: [
                               Container(
                                 margin: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 4),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.circle,
                                   size: 8,
-                                  color: Colors.green,
+                                  color: _isOtherValidMap[index] ?? false
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                               ),
                               Text(
-                                '已上传',
+                                _isOtherValidMap[index] ?? false
+                                    ? '图片合格'
+                                    : '图片不合格',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[800],
@@ -595,16 +675,16 @@ class _BasePageState extends State<_BasePage> {
           ),
         ),
         // 隐私声明
-        SizedBox(
-          height: 32,
-          child: Text(
-            '点击下一步，即表示您同意《隐私声明》',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
-        ),
+        // SizedBox(
+        //   height: 32,
+        //   child: Text(
+        //     '点击下一步，即表示您同意《隐私声明》',
+        //     style: TextStyle(
+        //       fontSize: 12,
+        //       color: Colors.grey[600],
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

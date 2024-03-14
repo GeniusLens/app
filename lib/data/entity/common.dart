@@ -76,3 +76,33 @@ class ModelVO {
     return toJson().toString();
   }
 }
+
+@JsonSerializable()
+class DetectVO {
+  int? code;
+  bool? frontal;
+  String? message;
+  String? url;
+
+  DetectVO({
+    this.code,
+    this.frontal,
+    this.message,
+    this.url,
+  });
+
+  // 是否为正面
+  bool get isFrontal => frontal ?? false;
+  // 是否合格
+  bool get isQualified => code == 1;
+
+  factory DetectVO.fromJson(Map<String, dynamic> json) =>
+      _$DetectVOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$DetectVOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+}
