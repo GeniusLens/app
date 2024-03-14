@@ -195,7 +195,7 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  _loras[_index].name!,
+                  _loras[_index].description!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -205,17 +205,17 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   ),
                 ),
               ),
-            if (_loras.isNotEmpty && _loras[_index].description != null)
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  '${_loras[_index].description}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
+            // if (_loras.isNotEmpty && _loras[_index].description != null)
+            //   Padding(
+            //     padding: const EdgeInsets.all(8),
+            //     child: Text(
+            //       '${_loras[_index].description}',
+            //       style: TextStyle(
+            //         fontSize: 16,
+            //         color: Colors.grey[600],
+            //       ),
+            //     ),
+            //   ),
             const Spacer(flex: 2),
             AnimatedOpacity(
               opacity: _loras.isNotEmpty ? 1 : 0,
@@ -252,16 +252,11 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                   if (result != true) {
                     return;
                   }
-                  setState(() {
-                    _submitting = true;
-                  });
+                  setState(() => _submitting = true);
                   var id = await GenerateApi.submitTask(
                     f: function,
-                    lora: List.generate(1, (index) => _loras[_index]),
-                    images: List.generate(
-                        1,
-                        (index) =>
-                            'https://i0.hdslb.com/bfs/article/cc69633424388f57c12f20c89a33430144224985.jpg'),
+                    lora: [_loras[_index]],
+                    images: [function.url!],
                   );
                   if (id == null) {
                     EasyLoading.showToast('生成失败');

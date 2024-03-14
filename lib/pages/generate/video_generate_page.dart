@@ -41,6 +41,12 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller?.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -134,6 +140,12 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.symmetric(vertical: 8),
             child: Swiper(
+              onIndexChanged: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              loop: false,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -158,8 +170,7 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
             ),
           ),
         if (_videoUrl != null)
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -191,7 +202,11 @@ class _VideoGeneratePageState extends State<VideoGeneratePage> {
                     EasyLoading.showError('请选择分身');
                     return;
                   }
-                  GenerateApi.submitTask();
+                  var lora = _loras[_selectedIndex];
+                  GenerateApi.submitTask(
+                    lora: [lora],
+                    images: [_videoUrl!],
+                  );
                   Get.offAndToNamed(AppRouter.manageTaskPage);
                 },
                 child: Container(
@@ -227,34 +242,49 @@ class _ModelItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var size = isCurrent ? 48.0 : 28.0;
-    return Container(
-      margin: const EdgeInsets.all(8),
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isCurrent
-              ? context.theme.primaryColor.withOpacity(0.6)
-              : Colors.transparent,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(3, 3),
+    var size = isCurrent ? 128.0 : 96.0;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            // width: size,
+            // height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isCurrent
+                    ? context.theme.primaryColor.withOpacity(0.6)
+                    : Colors.transparent,
+                width: 2,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: size,
+              backgroundImage: ExtendedImage.network(
+                model.avatar,
+                cache: true,
+              ).image,
+            ),
           ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: size / 2,
-        backgroundImage: ExtendedImage.network(
-          model.avatar,
-          cache: true,
-        ).image,
-      ),
+        ),
+        Text(
+          model.description ?? '',
+          style: TextStyle(
+            color: context.theme.primaryColor,
+            fontSize: 12,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/api/request/common.dart';
+import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/router.dart';
 import 'package:get/get.dart';
@@ -125,12 +126,21 @@ class _AnimeGeneratePageState extends State<AnimeGeneratePage> {
             opacity: _url == null ? 0 : 1,
             duration: const Duration(milliseconds: 300),
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 if (_url == null) {
                   EasyLoading.showToast('请先选择一张图片');
                 }
-                // TODO 提交任务
-                Get.offAndToNamed(AppRouter.manageTaskPage);
+                var id = await GenerateApi.submitTask(
+                  f: function,
+                  images: [_url!],
+                );
+                if (id == null) {
+                  EasyLoading.showToast('生成失败');
+                  return;
+                }
+                EasyLoading.showToast('生成成功');
+                // 关闭所有页面，跳转到生成结果页面
+                Get.offAllNamed(AppRouter.manageTaskPage);
               },
               child: Container(
                 padding:

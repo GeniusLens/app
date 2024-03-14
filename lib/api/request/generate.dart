@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:genius_lens/api/http.dart';
 import 'package:genius_lens/api/state.dart';
 import 'package:genius_lens/data/entity/result.dart';
@@ -102,10 +103,19 @@ class GenerateApi {
     String? sceneId,
     int? clothId,
   }) async {
+    // 打印任务参数
+    StringBuffer sb = StringBuffer();
+    sb.write('type: $type\n');
+    sb.write('function: ${f?.id}\n');
+    sb.write('lora: ${lora?.map((e) => e.id).toList()}\n');
+    sb.write('images: $images\n');
+    sb.write('sceneId: $sceneId\n');
+    sb.write('clothId: $clothId\n');
+    print(sb.toString());
     var response = await HttpUtil.post('$_prefix/inference', data: {
       'taskType': type ?? 1,
       'function': f?.id,
-      'loraIds': lora?.map((e) => "").toList(),
+      'loraIds': lora?.map((e) => e.id).toList(),
       'sourceImages': images,
       'sceneId': sceneId,
       'clothId': clothId,

@@ -111,10 +111,30 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
                     EasyLoading.showToast('请选择一个分身');
                     return;
                   }
-                  GenerateApi.submitTask(f: function, lora: _loras, images: [
-                    "https://image.thuray.xyz/2024/03/7a0806fe815131850a4b0b5cb8d311e1.png",
-                  ]);
-                  Get.offNamed(AppRouter.manageTaskPage);
+                  var seletedLoras = <LoraVO>[];
+                  print(_selected);
+                  _selected.forEach((key, value) {
+                    if (value) {
+                      seletedLoras.add(_loras[key]);
+                    }
+                  });
+                  if (seletedLoras.length != function.peopleCount) {
+                    EasyLoading.showToast('请选择${function.peopleCount}个分身');
+                    return;
+                  }
+                  var _images = [function.url!];
+                  GenerateApi.submitTask(
+                    f: function,
+                    lora: seletedLoras,
+                    images: _images,
+                  ).then((value) {
+                    if (value != null) {
+                      EasyLoading.showToast('任务提交成功');
+                      Get.offNamed(AppRouter.manageTaskPage);
+                    } else {
+                      EasyLoading.showToast('任务提交失败');
+                    }
+                  });
                 },
                 child: Container(
                   height: 48,

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -8,6 +9,8 @@ import 'package:genius_lens/router.dart';
 import 'package:genius_lens/utils/debug_util.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mime/mime.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class ManageTaskPage extends StatefulWidget {
   const ManageTaskPage({super.key});
@@ -18,6 +21,7 @@ class ManageTaskPage extends StatefulWidget {
 
 class _ManageTaskPageState extends State<ManageTaskPage> {
   final List<TaskVO> _tasks = [];
+  final List<String?> _coverUrls = [];
   bool _isLoading = false;
 
   Future<void> _loadData() async {
@@ -28,11 +32,8 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
     // 检查每一个result是否包含","分隔组成的多个URL
     // 如果是则仅保留第一个URL
     for (var element in data) {
-      if (element.result != null && element.result!.contains(',')) {
-        var newElement =
-            element.copyWith(result: element.result!.split(',')[0]);
-        data[data.indexOf(element)] = newElement;
-      }
+      _coverUrls.add(
+          (element.result != null) ? element.result!.split(',').first : null);
     }
     setState(() {
       _tasks.clear();
@@ -83,7 +84,10 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
                                 delay: const Duration(milliseconds: 50),
                                 child: ScaleAnimation(
                                   child: FadeInAnimation(
-                                    child: _TaskItem(task: e),
+                                    child: _TaskItem(
+                                      task: e,
+                                      cover: _coverUrls[_tasks.indexOf(e)],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -111,13 +115,21 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
   }
 }
 
-class _TaskItem extends StatelessWidget {
-  const _TaskItem({required this.task});
+class _TaskItem extends StatefulWidget {
+  const _TaskItem({required this.task, required this.cover});
 
   final TaskVO task;
+  final String? cover;
+
+  @override
+  State<_TaskItem> createState() => _TaskItemState();
+}
+
+class _TaskItemState extends State<_TaskItem> {
+  Widget? _content;
 
   String _buildMesage() {
-    switch (task.statusCode) {
+    switch (widget.task.statusCode) {
       case 1:
         return '您的作品还在排队等待中，请耐心等待';
       case 2:
@@ -132,7 +144,7 @@ class _TaskItem extends StatelessWidget {
   }
 
   String _getStatus() {
-    switch (task.statusCode) {
+    switch (widget.task.statusCode) {
       case 1:
         return '等待中';
       case 2:
@@ -147,7 +159,7 @@ class _TaskItem extends StatelessWidget {
   }
 
   Color _getStatusColor() {
-    switch (task.statusCode) {
+    switch (widget.task.statusCode) {
       case 1:
         return Colors.orange;
       case 2:
@@ -161,12 +173,77 @@ class _TaskItem extends StatelessWidget {
     }
   }
 
+  void _buildContent(BuildContext context) async {
+    Widget content = Center(
+      child: LoadingAnimationWidget.staggeredDotsWave(
+        color: context.theme.primaryColor,
+        size: 24,
+      ),
+    );
+
+    var response = await Dio().get(widget.cover!);
+    var mime = response.headers['content-type']?.first;
+    if (mime == null) {
+      return;
+    }
+    ImageProvider imageProvider;
+
+    // 视频加载缩略图
+    if (mime.startsWith('video')) {
+      var thumbnail = await VideoThumbnail.thumbnailData(
+        video: widget.cover!,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 256,
+        quality: 80,
+      );
+      imageProvider = MemoryImage(thumbnail!);
+    } else {
+      imageProvider = NetworkImage(widget.cover!);
+    }
+
+    // 图片加载
+    content = ExtendedImage(
+      image: imageProvider,
+      loadStateChanged: (state) {
+        if (state.extendedImageLoadState == LoadState.loading) {
+          return Center(
+            child: LoadingAnimationWidget.staggeredDotsWave(
+              color: context.theme.primaryColor,
+              size: 24,
+            ),
+          );
+        }
+        return null;
+      },
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
+    if (mounted) {
+      setState(() {
+        _content = ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          child: content,
+        );
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (widget.task.statusCode == 3) {
+        _buildContent(context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (task.statusCode == 3) {
-          Get.toNamed(AppRouter.generateResultPage, arguments: task);
+        if (widget.task.statusCode == 3) {
+          Get.toNamed(AppRouter.generateResultPage, arguments: widget.task);
         } else {
           EasyLoading.showToast(_buildMesage());
         }
@@ -188,39 +265,26 @@ class _TaskItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: (task.result != null)
-                  ? ClipRRect(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: ExtendedImage.network(
-                        task.result ?? DebugUtil.getRandomImageURL(),
-                        loadStateChanged: (state) {
-                          if (state.extendedImageLoadState ==
-                              LoadState.loading) {
-                            return Center(
-                              child: LoadingAnimationWidget.staggeredDotsWave(
-                                color: context.theme.primaryColor,
-                                size: 24,
-                              ),
-                            );
-                          }
-                          return null;
-                        },
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    )
+              child: (widget.task.result != null)
+                  ? _content ??
+                      Center(
+                        child: LoadingAnimationWidget.staggeredDotsWave(
+                          color: context.theme.primaryColor,
+                          size: 24,
+                        ),
+                      )
                   : Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(height: 32),
-                          if (task.statusCode == 1 || task.statusCode == 2)
+                          if (widget.task.statusCode == 1 ||
+                              widget.task.statusCode == 2)
                             LoadingAnimationWidget.staggeredDotsWave(
                               color: context.theme.primaryColor,
                               size: 24,
                             ),
-                          if (task.statusCode == 4)
+                          if (widget.task.statusCode == 4)
                             const Icon(Icons.error,
                                 size: 32, color: Colors.red),
                           const SizedBox(height: 8),
@@ -236,16 +300,17 @@ class _TaskItem extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        task.function,
-                        maxLines: 1,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          widget.task.function,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const Spacer(),
                       Text(
                         _getStatus(),
                         style:
@@ -255,7 +320,7 @@ class _TaskItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    task.time,
+                    widget.task.time,
                     style: const TextStyle(fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

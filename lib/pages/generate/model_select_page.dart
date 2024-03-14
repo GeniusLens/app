@@ -138,16 +138,17 @@ class _ModelItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  function.name ?? '',
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 16),
+                Expanded(
+                  child: Text(
+                    function.name ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
-                const Spacer(),
                 GestureDetector(
                   onTap: () {
                     switch (function.type) {
-                      case 'solo' || 'dynamic-solo':
+                      case 'solo' || 'video_solo':
                         Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
                         break;
@@ -155,10 +156,10 @@ class _ModelItem extends StatelessWidget {
                         Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
                         break;
-                      case 'scene':
+                      case 'scene' || 'video_scene':
                         Get.toNamed(AppRouter.viewGenerateExamplePage,
                             arguments: function);
-                      case 'anime' || 'dynamic-anime':
+                      case 'anime':
                         Get.toNamed(AppRouter.animeGeneratePage,
                             arguments: function);
                         break;

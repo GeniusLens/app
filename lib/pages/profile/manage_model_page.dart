@@ -302,7 +302,7 @@ class _InfoCardState extends State<_InfoCard> {
           Row(
             children: [
               Icon(Icons.circle, color: _buildColor(), size: 16),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.model.description ?? '',

@@ -42,9 +42,9 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
 
     _swiperCtrl = SwiperController();
 
-    if (function.type == 'scene') {
-      _showFab = true;
-    }
+    // if (function.type == 'scene') {
+    //   _showFab = true;
+    // }
   }
 
   @override
@@ -63,13 +63,13 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
             onTap: () {
               var route = '';
               switch (function.type) {
-                case 'solo' || 'dynamic-solo':
+                case 'solo' || 'video_solo':
                   route = AppRouter.soloGeneratePage;
                   break;
                 case 'multi':
                   route = AppRouter.multiGeneratePage;
                   break;
-                case 'scene':
+                case 'scene' || 'video_scene':
                   route = AppRouter.soloGeneratePage;
                   break;
                 default:
@@ -195,7 +195,7 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
               _swiperCtrl.move(index);
             },
             loop: false,
-            viewportFraction: (_images.length > 1) ? 0.3 : 1,
+            viewportFraction: 0.3,
             itemCount: _images.length,
             controller: _swiperCtrl,
           ),
