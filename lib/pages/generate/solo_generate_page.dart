@@ -232,6 +232,11 @@ class _SoloGeneratePageState extends State<SoloGeneratePage> {
                       content: const Text('确认生成任务吗？'),
                       surfaceTintColor: context.theme.scaffoldBackgroundColor,
                       backgroundColor: context.theme.cardColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      actionsPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
                       actions: [
                         TextButton(
                           onPressed: () {

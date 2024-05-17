@@ -29,17 +29,22 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
     setState(() => _isLoading = true);
 
     var data = await GenerateApi.getTaskList();
+    print('data length: ${data.length}');
     // 检查每一个result是否包含","分隔组成的多个URL
     // 如果是则仅保留第一个URL
+    _coverUrls.clear();
     for (var element in data) {
       _coverUrls.add(
           (element.result != null) ? element.result!.split(',').first : null);
     }
+    print('coverUrls length: ${_coverUrls.length}');
+
     setState(() {
       _tasks.clear();
       _tasks.addAll(data);
       _isLoading = false;
     });
+    print('tasks length: ${_tasks.length}');
   }
 
   @override
@@ -173,19 +178,22 @@ class _TaskItemState extends State<_TaskItem> {
     }
   }
 
-  void _buildContent(BuildContext context) async {
-    Widget content = Center(
-      child: LoadingAnimationWidget.staggeredDotsWave(
-        color: context.theme.primaryColor,
-        size: 24,
-      ),
-    );
+  void _printInfo(String msg) {
+    print('$msg at time: ${DateTime.now()}');
+  }
 
-    var response = await Dio().get(widget.cover!);
+  void _buildContent(BuildContext context) async {
+    _printInfo('buildContent');
+
+    // 请求Uint8List
+    var response = await Dio()
+        .get(widget.cover!, options: Options(responseType: ResponseType.bytes));
+    _printInfo('response: $response');
     var mime = response.headers['content-type']?.first;
     if (mime == null) {
       return;
     }
+    _printInfo('mime: $mime');
     ImageProvider imageProvider;
 
     // 视频加载缩略图
@@ -194,16 +202,20 @@ class _TaskItemState extends State<_TaskItem> {
         video: widget.cover!,
         imageFormat: ImageFormat.JPEG,
         maxWidth: 256,
-        quality: 80,
+        quality: 60,
       );
       imageProvider = MemoryImage(thumbnail!);
     } else {
-      imageProvider = NetworkImage(widget.cover!);
+      // 将图片处理为Uint8List
+      var bytes = response.data;
+      imageProvider = MemoryImage(bytes);
     }
+    _printInfo('imageProvider: $imageProvider');
 
     // 图片加载
-    content = ExtendedImage(
+    Widget content = ExtendedImage(
       image: imageProvider,
+      enableMemoryCache: true,
       loadStateChanged: (state) {
         if (state.extendedImageLoadState == LoadState.loading) {
           return Center(
@@ -218,6 +230,7 @@ class _TaskItemState extends State<_TaskItem> {
       width: double.infinity,
       fit: BoxFit.cover,
     );
+
     if (mounted) {
       setState(() {
         _content = ClipRRect(

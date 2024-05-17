@@ -532,8 +532,9 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
               ),
             ),
             explain: const [
-              '请上传一张正面照片，确保照片中的人脸清晰可见。',
-              '请上传一张或多张其他照片，确保照片中的人脸清晰可见。',
+              '避免上传面部被遮挡的照片。',
+              '保证照片只含有一个人的面部。',
+              '避免面部占比过小的照片。',
             ],
             goodSamples: _samples
                 .where((element) => element.type == 1)
@@ -585,7 +586,7 @@ class _BasePageState extends State<_BasePage> {
               children: widget.explain
                   .map(
                     (e) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
+                      margin: const EdgeInsets.only(bottom: 4),
                       child: Text(
                         '* $e',
                         style: TextStyle(
@@ -630,32 +631,29 @@ class _BasePageState extends State<_BasePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(
-                      child: Container(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: ExtendedImage.network(
-                            index < widget.goodSamples.length
-                                ? widget.goodSamples[index]
-                                : widget.badSamples[
-                                    index - widget.goodSamples.length],
-                            // cache: true,
-                            width: 96,
-                            height: 96,
-                            loadStateChanged: (state) {
-                              if (state.extendedImageLoadState ==
-                                  LoadState.loading) {
-                                return Center(
-                                  child:
-                                      LoadingAnimationWidget.fourRotatingDots(
-                                    color: context.theme.primaryColor,
-                                    size: 32,
-                                  ),
-                                );
-                              }
-                              return null;
-                            },
-                            fit: BoxFit.cover,
-                          ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: ExtendedImage.network(
+                          index < widget.goodSamples.length
+                              ? widget.goodSamples[index]
+                              : widget.badSamples[
+                                  index - widget.goodSamples.length],
+                          // cache: true,
+                          width: 96,
+                          height: 96,
+                          loadStateChanged: (state) {
+                            if (state.extendedImageLoadState ==
+                                LoadState.loading) {
+                              return Center(
+                                child: LoadingAnimationWidget.fourRotatingDots(
+                                  color: context.theme.primaryColor,
+                                  size: 32,
+                                ),
+                              );
+                            }
+                            return null;
+                          },
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -669,6 +667,7 @@ class _BasePageState extends State<_BasePage> {
                         color: index < widget.goodSamples.length
                             ? Colors.green
                             : Colors.red,
+                        size: 18,
                       ),
                     ),
                   ],

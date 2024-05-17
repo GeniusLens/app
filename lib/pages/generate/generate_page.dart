@@ -227,7 +227,7 @@ class _GenerateItem extends StatelessWidget {
                     return null;
                   },
                   cache: true,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -243,9 +243,9 @@ class _GenerateItem extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.name, style: const TextStyle(fontSize: 16)),
+                        Text(item.name, style: const TextStyle(fontSize: 18)),
                         Text(
-                          "${item.description}",
+                          item.description ?? '',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],

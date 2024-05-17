@@ -30,11 +30,20 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
     } else {
       _urls.add(_task.result!);
     }
-    setState(() {});
+    if (_urls.isEmpty) {
+      return;
+    }
     // 长度大于1说明不是视频
     if (_urls.length > 1) {
       return;
     }
+    if (mounted) {
+      setState(() {
+        _isVideo = false;
+      });
+    }
+
+    print('Processing: ${_task.result} at time: ${DateTime.now()}');
     // 请求文件检查是否是视频
     var response = await Dio().get(_task.result!);
     var mime = response.headers['content-type']?.first;
@@ -54,6 +63,7 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
     _task = Get.arguments as TaskVO;
     _swiperCtrl = SwiperController();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      print('addPostFrameCallback at time: ${DateTime.now()}');
       if (_task.result != null) {
         _process();
       }
@@ -99,6 +109,7 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
                                 activeColor: Colors.transparent,
                               ),
                             ),
+                      autoplay: true,
                       itemBuilder: (context, index) {
                         return Container(
                           child: _buildItem(context, index),
