@@ -2,6 +2,7 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:dio/dio.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:genius_lens/data/entity/generate.dart';
 import 'package:genius_lens/widget/image_save_widget.dart';
 import 'package:get/get.dart';
@@ -122,38 +123,38 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
                     ),
             ),
             if (_task.result != null)
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Get.bottomSheet(
-                          ImageSaveWidget(imageUrl: _task.result!)),
-                      child: Container(
-                        height: 48,
-                        alignment: Alignment.center,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 32),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: context.theme.primaryColor,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    if (_task.result == null) {
+                      return;
+                    }
+                    Get.bottomSheet(ImageSaveWidget(imageUrl: _task.result!));
+                  },
+                  child: Container(
+                    height: 48,
+                    alignment: Alignment.center,
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: context.theme.primaryColor,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(2, 2),
                         ),
-                        child: const Text(
-                          '保存',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
+                      ],
+                    ),
+                    child: const Text(
+                      '保存',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
-                ],
-              )
+                ),
+              ),
           ],
         ),
       ),
