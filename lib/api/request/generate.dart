@@ -95,6 +95,7 @@ class GenerateApi {
     return list;
   }
 
+  /// 提交推理任务
   static Future<int?> submitTask({
     int? type,
     FunctionVO? f,
@@ -103,15 +104,6 @@ class GenerateApi {
     String? sceneId,
     int? clothId,
   }) async {
-    // 打印任务参数
-    StringBuffer sb = StringBuffer();
-    sb.write('type: $type\n');
-    sb.write('function: ${f?.id}\n');
-    sb.write('lora: ${lora?.map((e) => e.id).toList()}\n');
-    sb.write('images: $images\n');
-    sb.write('sceneId: $sceneId\n');
-    sb.write('clothId: $clothId\n');
-    print(sb.toString());
     var response = await HttpUtil.post('$_prefix/inference', data: {
       'taskType': type ?? 1,
       'function': f?.id,
@@ -125,6 +117,27 @@ class GenerateApi {
     return (type != null && type == 2)
         ? (wrapper.code == '200' ? 1 : null)
         : wrapper.data['id'] as int?;
+  }
+
+  /// 提交换装任务
+  /// [modelUrl] 模特图片地址
+  /// [clothUrl] 服装图片地址
+  /// [func] 功能
+  /// [clothId] 服装ID
+  static Future<int?> submitTryonTask({
+    required String modelUrl,
+    required String clothUrl,
+    required FunctionVO func,
+    required int clothId,
+  }) async {
+    List<String> images = [];
+    images.add(modelUrl);
+    images.add(clothUrl);
+    return await GenerateApi.submitTask(
+      f: func,
+      images: images,
+      clothId: clothId,
+    );
   }
 
   static Future<List<TaskVO>> getTaskList() async {

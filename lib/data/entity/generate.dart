@@ -115,6 +115,8 @@ class SampleVO {
   }
 }
 
+enum TaskVOStatus { empty, pending, processing, completed, failed }
+
 @JsonSerializable()
 class TaskVO {
   final int id;

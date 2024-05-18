@@ -20,54 +20,101 @@ class TryOnGeneratePage extends StatefulWidget {
   State<TryOnGeneratePage> createState() => _TryOnGeneratePageState();
 }
 
+/// 试穿页面
 class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
+  /// 功能分类
+  /// 显示在AppBar的标题上
   late final CategoryVO _category;
-  late final FunctionVO _function;
-  int? _taskId;
-  TaskVO? task;
-  final GlobalKey _panelKey = GlobalKey();
-  final List<ModelVO> _models = [];
-  final List<ClothVO> _clothes = [];
-  final List<String> _results = [];
-  bool _waiting = false;
-  late final SwiperController _swiperCtrl;
 
+  /// 功能
+  /// 用于提交任务
+  late final FunctionVO _function;
+
+  /// 任务ID
+  int? _taskId;
+
+  /// 任务信息
+  TaskVO? currentTask;
+
+  /// 服装选择面板的Key
+  final GlobalKey _panelKey = GlobalKey();
+
+  /// 模特列表
+  final List<ModelVO> _models = [];
+
+  /// 服装列表
+  final List<ClothVO> _clothes = [];
+
+  /// 试穿结果
+  /// 存储结果的URL
+  final List<String> _results = [];
+
+  /// 是否正在等待换装
+  bool _tryonWaiting = false;
+
+  /// 是否正在上传自定义服装
+  bool _uploadingCloth = false;
+
+  /// 是否正在上传自定义模特
+  bool _uploadingModel = false;
+
+  /// 上下翻转控制器（结果和模特）
+  late final SwiperController _updownSwiperCtrl;
+
+  /// 模特选择控制器
+  late final SwiperController _modelSwiperCtrl;
+
+  /// 选择的服装
   int _selectedCloth = -1;
+
+  /// 选择的模特
   int _selectedModel = -1;
 
-  void _loadTask() {
+  /// Panel 高度
+  double panelHeight = 312;
+
+  /// 提交任务
+  void _handleTaskQuery() {
+    if (_taskId == null) {
+      debugPrint('Task Id is null');
+      return;
+    }
     // 轮询获取结果
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       var result = await GenerateApi.getTaskInfo(_taskId!);
-      if (result.statusCode == 3 || result.statusCode == 4) {
+      if (result.statusCode == TaskVOStatus.completed.index ||
+          result.statusCode == TaskVOStatus.failed.index) {
+        // 取消定时器
         timer.cancel();
         EasyLoading.dismiss();
+
         // 处理失败情况
-        // && _waiting 是为了防止在试穿失败时重复弹出Toast，所谓防抖
-        if (result.statusCode == 4 && _waiting) {
+        if (result.statusCode == TaskVOStatus.failed.index && _tryonWaiting) {
           EasyLoading.showToast('试穿失败');
           setState(() {
-            _waiting = false;
+            _tryonWaiting = false;
           });
           return;
         }
 
         // 处理成功情况
         // 按照,分割并去掉最后一个空字符串
-        task = result;
-        var resultList = task!.result!.split(',');
+        currentTask = result;
+        var resultUrls = currentTask!.result!.split(',');
         setState(() {
-          _waiting = false;
+          _tryonWaiting = false;
           _results.clear();
-          _results.addAll(resultList);
+          _results.addAll(resultUrls);
         });
-        if (_swiperCtrl.index == 0) {
-          _swiperCtrl.next();
+        // 切换到结果页
+        if (_updownSwiperCtrl.index == 0) {
+          _updownSwiperCtrl.next();
         }
       }
     });
   }
 
+  /// 加载服装
   Future<void> _loadClothes() async {
     var data = await CommonAPi.getClothes();
     setState(() {
@@ -76,6 +123,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
     });
   }
 
+  /// 加载模特
   Future<void> _loadModels() async {
     var data = await CommonAPi.getModels();
     setState(() {
@@ -84,6 +132,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
     });
   }
 
+  /// 加载功能列表
   Future<void> _loadFunction() async {
     var result = await GenerateApi.getFunctionList(_category.name);
     if (result.isNotEmpty) {
@@ -97,8 +146,18 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // 获取Panel高度
+      final RenderBox renderBox =
+          _panelKey.currentContext!.findRenderObject() as RenderBox;
+      panelHeight = renderBox.size.height;
+    });
+
     _category = Get.arguments as CategoryVO;
-    _swiperCtrl = SwiperController();
+
+    _updownSwiperCtrl = SwiperController();
+    _modelSwiperCtrl = SwiperController();
+
     _loadModels();
     _loadFunction();
     _loadClothes();
@@ -110,6 +169,8 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
     if (_taskId != null) {
       Timer.periodic(const Duration(seconds: 1), (timer) {});
     }
+    _updownSwiperCtrl.dispose();
+    _modelSwiperCtrl.dispose();
     super.dispose();
   }
 
@@ -122,33 +183,9 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
+          // 提交按钮
           GestureDetector(
-            onTap: () async {
-              if (_waiting) {
-                EasyLoading.showToast('正在试穿中');
-                return;
-              }
-              if (_selectedCloth == -1) {
-                EasyLoading.showToast('请选择衣服');
-                return;
-              }
-              setState(() => _waiting = true);
-              List<String> images = [];
-              images.add(_models[_selectedModel].url!);
-              images.add(_clothes[_selectedCloth].url!);
-              var result = await GenerateApi.submitTask(
-                f: _function,
-                images: images,
-                clothId: _clothes[_selectedCloth].id,
-              );
-              print('Result Id: $result');
-              if (result == null) {
-                EasyLoading.showToast('提交失败');
-                return;
-              }
-              setState(() => _taskId = result);
-              _loadTask();
-            },
+            onTap: _onSubmit,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               margin: const EdgeInsets.only(right: 16),
@@ -163,7 +200,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                   ),
                 ],
               ),
-              child: (_waiting)
+              child: (_tryonWaiting)
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: LoadingAnimationWidget.prograssiveDots(
@@ -209,92 +246,19 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 ),
               ),
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
+                child: Scrollbar(
+                  thickness: 4,
+                  radius: const Radius.circular(4),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: _clothes.length + 1,
+                    itemBuilder: _buildClothItem,
                   ),
-                  itemCount: _clothes.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == _clothes.length) {
-                      return GestureDetector(
-                        onTap: () async {
-                          EasyLoading.show(status: '上传中...');
-                          var file = await ImagePicker().pickImage(
-                            source: ImageSource.gallery,
-                          );
-                          var upload = await CommonAPi.uploadFile(file!.path);
-                          if (upload != null) {
-                            setState(() {
-                              _clothes.add(ClothVO(
-                                url: upload,
-                              ));
-                              _selectedCloth = _clothes.length - 1;
-                            });
-                            EasyLoading.dismiss();
-                            EasyLoading.showToast('上传成功');
-                          }
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[200],
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 2,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.add,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (_waiting) return;
-                          if (_selectedCloth == index) {
-                            _selectedCloth = -1;
-                          } else {
-                            _selectedCloth = index;
-                          }
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: (_selectedCloth == index)
-                              ? Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                  width: 2,
-                                )
-                              : null,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 2,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: ExtendedImage.network(
-                            _clothes[index].url!,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -310,7 +274,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
           children: [
             Expanded(
               child: Swiper(
-                controller: _swiperCtrl,
+                controller: _updownSwiperCtrl,
                 itemCount: 1 + (_results.isEmpty ? 0 : 1),
                 scrollDirection: Axis.vertical,
                 loop: false,
@@ -319,6 +283,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                   disableColor: Colors.grey[400]!,
                   size: 24,
                 ),
+                transformer: ScaleAndFadeTransformer(),
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return _buildModelLevel(context);
@@ -328,11 +293,152 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 },
               ),
             ),
-            const SizedBox(height: 294),
+            // const SizedBox(height: 294),
+            SizedBox.fromSize(size: Size.fromHeight(panelHeight)),
           ],
         ),
       ),
     );
+  }
+
+  /// 构建服装选择项
+  /// 最后一项为添加按钮
+  Widget? _buildClothItem(context, index) {
+    if (index == _clothes.length) {
+      return GestureDetector(
+        onTap: () async {
+          // EasyLoading.show(status: '上传中...');
+          var file = await ImagePicker().pickImage(
+            source: ImageSource.gallery,
+          );
+          if (file == null || file.path.isEmpty) {
+            return;
+          } else {
+            setState(() {
+              _uploadingCloth = true;
+            });
+            // EasyLoading.show(status: '上传中...');
+          }
+
+          var uploaded = await CommonAPi.uploadFile(file.path);
+          if (uploaded != null) {
+            setState(() {
+              _clothes.add(ClothVO(
+                url: uploaded,
+              ));
+              // 选择最后一个
+              _selectedCloth = _clothes.length - 1;
+              _uploadingCloth = false;
+            });
+            // EasyLoading.dismiss();
+            // EasyLoading.showToast('上传成功');
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey[200],
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 2,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Center(
+            child: _uploadingCloth
+                ? LoadingAnimationWidget.prograssiveDots(
+                    color: Theme.of(context).primaryColor,
+                    size: 32,
+                  )
+                : const Icon(
+                    Icons.add,
+                    color: Colors.grey,
+                  ),
+          ),
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () {
+        if (_tryonWaiting) return;
+        setState(() {
+          if (_selectedCloth == index) {
+            _selectedCloth = -1;
+          } else {
+            _selectedCloth = index;
+          }
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: (_selectedCloth == index)
+              ? Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                )
+              : null,
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 2,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: ExtendedImage.network(
+            _clothes[index].url!,
+            fit: BoxFit.cover,
+            loadStateChanged: (state) {
+              if (state.extendedImageLoadState == LoadState.loading) {
+                return Center(
+                  child: LoadingAnimationWidget.prograssiveDots(
+                    color: Theme.of(context).primaryColor,
+                    size: 32,
+                  ),
+                );
+              } else if (state.extendedImageLoadState == LoadState.failed) {
+                return const Center(
+                  child: Icon(Icons.error),
+                );
+              }
+              return null;
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 提交任务
+  void _onSubmit() async {
+    if (_tryonWaiting) {
+      EasyLoading.showToast('正在试穿中');
+      return;
+    }
+    if (_selectedCloth == -1) {
+      EasyLoading.showToast('请选择衣服');
+      return;
+    }
+    setState(() => _tryonWaiting = true);
+
+    // 提交任务
+    var submittedTaskId = await GenerateApi.submitTryonTask(
+        modelUrl: _models[_selectedModel].url!,
+        clothUrl: _clothes[_selectedCloth].url!,
+        func: _function,
+        clothId: _clothes[_selectedCloth].id!);
+
+    if (submittedTaskId == null) {
+      EasyLoading.showToast('提交失败');
+      return;
+    }
+    setState(() => _taskId = submittedTaskId);
+    _handleTaskQuery();
   }
 
   Swiper _buildModelLevel(BuildContext context) {
@@ -350,18 +456,25 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                 var file = await ImagePicker().pickImage(
                   source: ImageSource.gallery,
                 );
-                if (file != null) {
-                  EasyLoading.show(status: '上传中...');
-                  var upload = await CommonAPi.uploadFile(file.path);
-                  if (upload != null) {
-                    setState(() {
-                      _models.add(ModelVO(
-                        url: upload,
-                      ));
-                    });
-                    EasyLoading.dismiss();
-                    EasyLoading.showToast('上传成功');
-                  }
+                if (file == null || file.path.isEmpty) {
+                  return;
+                }
+                setState(() {
+                  _uploadingModel = true;
+                });
+                // EasyLoading.show(status: '上传中...');
+                var upload = await CommonAPi.uploadFile(file.path);
+                if (upload != null) {
+                  setState(() {
+                    _models.add(ModelVO(
+                      url: upload,
+                    ));
+                    // 选择最后一个
+                    _selectedModel = _models.length - 1;
+                    _uploadingModel = false;
+                  });
+                  // EasyLoading.dismiss();
+                  // EasyLoading.showToast('上传成功');
                 }
               },
               child: Container(
@@ -377,11 +490,16 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
                     ),
                   ],
                 ),
-                child: Icon(
-                  Icons.add,
-                  color: context.theme.primaryColor,
-                  size: 64,
-                ),
+                child: _uploadingModel
+                    ? LoadingAnimationWidget.prograssiveDots(
+                        color: context.theme.primaryColor,
+                        size: 32,
+                      )
+                    : Icon(
+                        Icons.add,
+                        color: context.theme.primaryColor,
+                        size: 48,
+                      ),
               ),
             ),
           );
@@ -432,7 +550,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
               ),
               // 加载时添加一个蒙版
               AnimatedOpacity(
-                opacity: _waiting ? 0.5 : 0.0,
+                opacity: _tryonWaiting ? 0.5 : 0.0,
                 duration: const Duration(milliseconds: 300),
                 child: Container(
                   decoration: BoxDecoration(
@@ -456,7 +574,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
       viewportFraction: 0.7,
       itemBuilder: (context, index) {
         if (_results.isEmpty) {
-          if (_waiting) {
+          if (_tryonWaiting) {
             return Center(
               child: LoadingAnimationWidget.fourRotatingDots(
                 color: context.theme.primaryColor,
@@ -518,7 +636,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
               ),
               // 加载时添加一个蒙版
               AnimatedOpacity(
-                opacity: _waiting ? 0.5 : 0.0,
+                opacity: _tryonWaiting ? 0.5 : 0.0,
                 duration: const Duration(milliseconds: 300),
                 child: Container(
                   decoration: BoxDecoration(
