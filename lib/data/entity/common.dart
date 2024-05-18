@@ -36,11 +36,13 @@ class ClothVO {
   int? id;
   String? prompt;
   String? url;
+  String? link;
 
   ClothVO({
     this.id,
     this.prompt,
     this.url,
+    this.link,
   });
 
   factory ClothVO.fromJson(Map<String, dynamic> json) =>

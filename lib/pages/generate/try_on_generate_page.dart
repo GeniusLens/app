@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/api/request/generate.dart';
@@ -370,6 +372,33 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
             _selectedCloth = index;
           }
         });
+      },
+      onLongPress: () async {
+        // 弹出Dialog
+        // 询问是否复制链接
+        showPlatformDialog(
+          context: context,
+          builder: (context) => BasicDialogAlert(
+            title: const Text('复制链接'),
+            content: const Text('是否复制链接到剪贴板？'),
+            actions: <Widget>[
+              BasicDialogAction(
+                title: const Text('取消'),
+                onPressed: () => Get.back(),
+              ),
+              BasicDialogAction(
+                title: const Text('复制'),
+                onPressed: () {
+                  Get.back();
+                  Clipboard.setData(
+                    ClipboardData(text: _clothes[index].link ?? ''),
+                  );
+                  EasyLoading.showToast('复制成功');
+                },
+              ),
+            ],
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
