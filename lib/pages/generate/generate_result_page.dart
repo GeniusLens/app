@@ -17,13 +17,25 @@ class GenerateResultPage extends StatefulWidget {
 }
 
 class _GenerateResultPageState extends State<GenerateResultPage> {
+  /// 任务
   late final TaskVO _task;
+
+  /// 图片或视频的url
   final List<String> _urls = [];
+
+  /// 是否是视频
   bool _isVideo = false;
+
+  /// Swiper控制器
   late final SwiperController _swiperCtrl;
+
+  /// 视频控制器
   VideoPlayerController? _videoCtrl;
+
+  /// 初始化视频播放器
   late Future<void> _initVideoPlayer;
 
+  /// 处理任务结果
   void _process() async {
     // 先对url进行处理
     if (_task.result!.contains(',')) {
@@ -44,7 +56,6 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
       });
     }
 
-    print('Processing: ${_task.result} at time: ${DateTime.now()}');
     // 请求文件检查是否是视频
     var response = await Dio().get(_task.result!);
     var mime = response.headers['content-type']?.first;
@@ -64,7 +75,6 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
     _task = Get.arguments as TaskVO;
     _swiperCtrl = SwiperController();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      print('addPostFrameCallback at time: ${DateTime.now()}');
       if (_task.result != null) {
         _process();
       }
@@ -122,6 +132,17 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
                       size: 36,
                     ),
             ),
+            // Container(
+            //   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            //   child: Row(
+            //     children: [
+            //       Text(
+            //         '任务：${_task.function}',
+            //         style: const TextStyle(fontSize: 18),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             if (_task.result != null)
               Center(
                 child: GestureDetector(
