@@ -23,10 +23,12 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
   Future<void> _loadData() async {
     var result = await CommunityApi().getComments(_content!.id);
-    setState(() {
-      _comments.clear();
-      _comments.addAll(result);
-    });
+    if (mounted) {
+      setState(() {
+        _comments.clear();
+        _comments.addAll(result);
+      });
+    }
   }
 
   Widget _buildAppBarHeader() {
@@ -67,8 +69,11 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   @override
   void initState() {
     super.initState();
-    _content = context.read<CommunityProvider>().community;
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _content = context.read<CommunityProvider>().community;
+      print(_content);
+      _loadData();
+    });
   }
 
   @override
@@ -117,17 +122,22 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               ),
             ),
           SliverToBoxAdapter(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: context.theme.cardColor,
               child: Text(
                 _content?.title ?? '标题',
-                style: TextStyle(fontSize: 18, color: Colors.grey[800]),
+                style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w500),
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: context.theme.cardColor,
               child: Text(
                 _content?.content ?? '内容',
                 style: TextStyle(color: Colors.grey[800]),
@@ -217,6 +227,18 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     size: 16,
                   ),
                 ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                '评论',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
               ),
             ),
           ),

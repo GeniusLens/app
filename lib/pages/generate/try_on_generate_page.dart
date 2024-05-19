@@ -10,6 +10,7 @@ import 'package:genius_lens/api/request/common.dart';
 import 'package:genius_lens/api/request/generate.dart';
 import 'package:genius_lens/data/entity/common.dart';
 import 'package:genius_lens/data/entity/generate.dart';
+import 'package:genius_lens/widget/image_save_widget.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -619,62 +620,69 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
             );
           }
         }
-        return Container(
-          margin: const EdgeInsets.only(bottom: 32, top: 32),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: context.theme.cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey[300]!,
-                blurRadius: 8,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: ExtendedImage.network(
-                    _results[index],
-                    loadStateChanged: (state) {
-                      if (state.extendedImageLoadState == LoadState.loading) {
-                        return Center(
-                          child: LoadingAnimationWidget.prograssiveDots(
-                            color: context.theme.primaryColor,
-                            size: 32,
-                          ),
-                        );
-                      } else if (state.extendedImageLoadState ==
-                          LoadState.failed) {
-                        return const Center(
-                          child: Icon(Icons.error),
-                        );
-                      }
-                      return null;
-                    },
-                    fit: BoxFit.cover,
+        return GestureDetector(
+          onTap: () {
+            if (_tryonWaiting) return;
+            Get.bottomSheet(ImageSaveWidget(imageUrl: _results[index]));
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 32, top: 32),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: context.theme.cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[300]!,
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: ExtendedImage.network(
+                      _results[index],
+                      loadStateChanged: (state) {
+                        if (state.extendedImageLoadState == LoadState.loading) {
+                          return Center(
+                            child: LoadingAnimationWidget.prograssiveDots(
+                              color: context.theme.primaryColor,
+                              size: 32,
+                            ),
+                          );
+                        } else if (state.extendedImageLoadState ==
+                            LoadState.failed) {
+                          return const Center(
+                            child: Icon(Icons.error),
+                          );
+                        }
+                        return null;
+                      },
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-              // 加载时添加一个蒙版
-              AnimatedOpacity(
-                opacity: _tryonWaiting ? 0.5 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(14),
+
+                // 加载时添加一个蒙版
+                AnimatedOpacity(
+                  opacity: _tryonWaiting ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         );
       },
