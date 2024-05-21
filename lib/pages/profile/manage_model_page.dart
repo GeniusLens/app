@@ -259,7 +259,7 @@ class _InfoCardState extends State<_InfoCard> {
   final TextEditingController _controller = TextEditingController();
 
   Color _buildColor() {
-    print(widget.model);
+    // print(widget.model);
     switch (widget.model.status) {
       case 1:
         return Colors.orange;

@@ -21,35 +21,39 @@ class ManageTaskPage extends StatefulWidget {
 
 class _ManageTaskPageState extends State<ManageTaskPage> {
   final List<TaskVO> _tasks = [];
-  final List<String?> _coverUrls = [];
+  // final List<String?> _coverUrls = [];
   bool _isLoading = false;
+  String? _seletectedCategory;
+  List<String> _categories = ['全部', 'AI趣图像', 'AI趣穿搭', 'AI趣视频'];
 
   Future<void> _loadData() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
-    var data = await GenerateApi.getTaskList();
-    print('data length: ${data.length}');
+    var data = await GenerateApi.getTaskList(
+        _seletectedCategory == '全部' ? null : _seletectedCategory);
+    // print('data length: ${data.length}');
     // 检查每一个result是否包含","分隔组成的多个URL
     // 如果是则仅保留第一个URL
-    _coverUrls.clear();
-    for (var element in data) {
-      _coverUrls.add(
-          (element.result != null) ? element.result!.split(',').first : null);
-    }
-    print('coverUrls length: ${_coverUrls.length}');
+    // _coverUrls.clear();
+    // for (var element in data) {
+    //   _coverUrls.add(
+    //       (element.result != null) ? element.result!.split(',').first : null);
+    // }
+    // print('coverUrls length: ${_coverUrls.length}');
 
     setState(() {
       _tasks.clear();
       _tasks.addAll(data);
       _isLoading = false;
     });
-    print('tasks length: ${_tasks.length}');
+    // print('tasks length: ${_tasks.length}');
   }
 
   @override
   void initState() {
     super.initState();
+    _seletectedCategory = _categories.first;
     _loadData();
   }
 
@@ -61,6 +65,27 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
         backgroundColor: context.theme.scaffoldBackgroundColor,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          // 弹出菜单
+          PopupMenuButton(
+            itemBuilder: (context) {
+              return _categories
+                  .map(
+                    (e) => PopupMenuItem(
+                      value: e,
+                      child: Text(e),
+                    ),
+                  )
+                  .toList();
+            },
+            onSelected: (value) {
+              setState(() {
+                _seletectedCategory = value as String?;
+              });
+              _loadData();
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -90,8 +115,9 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
                                 child: ScaleAnimation(
                                   child: FadeInAnimation(
                                     child: _TaskItem(
+                                      key: ValueKey(e.id),
                                       task: e,
-                                      cover: _coverUrls[_tasks.indexOf(e)],
+                                      cover: e.cover,
                                     ),
                                   ),
                                 ),
@@ -121,7 +147,11 @@ class _ManageTaskPageState extends State<ManageTaskPage> {
 }
 
 class _TaskItem extends StatefulWidget {
-  const _TaskItem({required this.task, required this.cover});
+  const _TaskItem({
+    super.key,
+    required this.task,
+    this.cover,
+  });
 
   final TaskVO task;
   final String? cover;
@@ -179,42 +209,46 @@ class _TaskItemState extends State<_TaskItem> {
   }
 
   void _printInfo(String msg) {
-    print('$msg at time: ${DateTime.now()}');
+    // print('$msg at time: ${DateTime.now()}');
   }
 
   void _buildContent(BuildContext context) async {
-    _printInfo('buildContent');
+    // _printInfo('buildContent');
 
-    // 请求Uint8List
-    var response = await Dio()
-        .get(widget.cover!, options: Options(responseType: ResponseType.bytes));
-    _printInfo('response: $response');
-    var mime = response.headers['content-type']?.first;
-    if (mime == null) {
+    // // 请求Uint8List
+    // var response = await Dio()
+    //     .get(widget.cover!, options: Options(responseType: ResponseType.bytes));
+    // _printInfo('response: $response');
+    // var mime = response.headers['content-type']?.first;
+    // if (mime == null) {
+    //   return;
+    // }
+    // _printInfo('mime: $mime');
+    // ImageProvider imageProvider;
+
+    // // 视频加载缩略图
+    // if (mime.startsWith('video')) {
+    //   var thumbnail = await VideoThumbnail.thumbnailData(
+    //     video: widget.cover!,
+    //     imageFormat: ImageFormat.JPEG,
+    //     maxWidth: 256,
+    //     quality: 60,
+    //   );
+    //   imageProvider = MemoryImage(thumbnail!);
+    // } else {
+    //   // 将图片处理为Uint8List
+    //   var bytes = response.data;
+    //   imageProvider = MemoryImage(bytes);
+    // }
+    // _printInfo('imageProvider: $imageProvider');
+
+    if (widget.cover == null) {
       return;
     }
-    _printInfo('mime: $mime');
-    ImageProvider imageProvider;
-
-    // 视频加载缩略图
-    if (mime.startsWith('video')) {
-      var thumbnail = await VideoThumbnail.thumbnailData(
-        video: widget.cover!,
-        imageFormat: ImageFormat.JPEG,
-        maxWidth: 256,
-        quality: 60,
-      );
-      imageProvider = MemoryImage(thumbnail!);
-    } else {
-      // 将图片处理为Uint8List
-      var bytes = response.data;
-      imageProvider = MemoryImage(bytes);
-    }
-    _printInfo('imageProvider: $imageProvider');
 
     // 图片加载
     Widget content = ExtendedImage(
-      image: imageProvider,
+      image: Image.network(widget.cover!).image,
       enableMemoryCache: true,
       loadStateChanged: (state) {
         if (state.extendedImageLoadState == LoadState.loading) {

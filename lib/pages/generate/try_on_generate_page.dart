@@ -79,7 +79,7 @@ class _TryOnGeneratePageState extends State<TryOnGeneratePage> {
   /// 提交任务
   void _handleTaskQuery() {
     if (_taskId == null) {
-      debugPrint('Task Id is null');
+      // debugPrint('Task Id is null');
       return;
     }
     // 轮询获取结果

@@ -38,7 +38,7 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
         count++;
       }
     });
-    print('Count: $count, PeopleCount: ${function.peopleCount}');
+    // print('Count: $count, PeopleCount: ${function.peopleCount}');
     return count == function.peopleCount;
   }
 
@@ -112,7 +112,7 @@ class _MultiGeneratePageState extends State<MultiGeneratePage> {
                     return;
                   }
                   var seletedLoras = <LoraVO>[];
-                  print(_selected);
+                  // print(_selected);
                   _selected.forEach((key, value) {
                     if (value) {
                       seletedLoras.add(_loras[key]);

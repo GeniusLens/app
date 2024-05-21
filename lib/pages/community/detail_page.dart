@@ -71,7 +71,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _content = context.read<CommunityProvider>().community;
-      print(_content);
+      // print(_content);
       _loadData();
     });
   }

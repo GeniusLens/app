@@ -126,6 +126,8 @@ class TaskVO {
   final int? statusCode;
   final String function;
   final String time;
+  final String? cover;
+  final bool? isVideo;
 
   TaskVO(
     this.id,
@@ -135,6 +137,8 @@ class TaskVO {
     this.statusCode,
     this.function,
     this.time,
+    this.cover,
+    this.isVideo,
   );
 
   factory TaskVO.fromJson(Map<String, dynamic> json) => _$TaskVOFromJson(json);
@@ -164,6 +168,8 @@ class TaskVO {
       statusCode ?? this.statusCode,
       function ?? this.function,
       time ?? this.time,
+      cover,
+      isVideo,
     );
   }
 }

@@ -140,8 +140,9 @@ class GenerateApi {
     );
   }
 
-  static Future<List<TaskVO>> getTaskList() async {
-    var response = await HttpUtil.get('$_prefix/inference/list');
+  static Future<List<TaskVO>> getTaskList(String? category) async {
+    var response = await HttpUtil.get('$_prefix/inference/list',
+        queryParameters: {'parentCategory': category});
     var wrapper = Result.fromJson(response.data);
     List<TaskVO> list = [];
     for (var item in wrapper.data) {
@@ -178,7 +179,7 @@ class GenerateApi {
       ],
       "max_tokens": 512
     };
-    print(data);
+    // print(data);
 
     // 临时修改Header
     HttpUtil.removeHeader('Authorization');

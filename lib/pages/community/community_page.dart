@@ -46,8 +46,8 @@ class _CommunityPageState extends State<CommunityPage>
       _isLoading = true;
     });
     var list = await CommunityApi().getCommunityRecommendList();
-    debugPrint('item count: ${list.length}');
-    debugPrint(list.toString());
+    // debugPrint('item count: ${list.length}');
+    // debugPrint(list.toString());
     setState(() {
       _list.addAll(list);
       _isLoading = false;

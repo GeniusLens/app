@@ -25,7 +25,7 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
   void initState() {
     super.initState();
     function = Get.arguments as FunctionVO;
-    print(function);
+    // print(function);
     // 将图片地址添加到_images中
     if (function.url == null) {
       return;
@@ -38,7 +38,7 @@ class _ViewGenerateExamplePageState extends State<ViewGenerateExamplePage> {
         }
       });
     }
-    print(_images);
+    // print(_images);
 
     _swiperCtrl = SwiperController();
 

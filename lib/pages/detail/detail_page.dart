@@ -24,7 +24,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     _scrollController = ScrollController();
     _scrollController.addListener(() {
-      debugPrint(_scrollController.offset.toString());
+      // debugPrint(_scrollController.offset.toString());
       if (_scrollController.offset > _imageHeight / 3) {
         if (!_showFab) {
           setState(() => _showFab = true);

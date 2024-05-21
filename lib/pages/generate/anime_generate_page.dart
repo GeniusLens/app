@@ -45,13 +45,13 @@ class _AnimeGeneratePageState extends State<AnimeGeneratePage> {
                       onTap: () async {
                         var image = await ImagePicker()
                             .pickImage(source: ImageSource.gallery);
-                        print(image);
+                        // print(image);
                         if (image == null) {
                           return;
                         }
                         setState(() => _uploading = true);
                         var uploaded = await CommonAPi.uploadFile(image.path);
-                        print(uploaded);
+                        // print(uploaded);
                         setState(() {
                           _url = uploaded;
                           _uploading = false;

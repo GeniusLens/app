@@ -30,7 +30,7 @@ class UserApi {
     await SharedPreferenceUtil().saveData('token', token);
     // 检查是否保存成功
     if (await SharedPreferenceUtil().getData('token') != token) {
-      print('Token save failed');
+      // print('Token save failed');
     }
     ApiState().updateToken(token);
     UserVO user = UserVO.fromJson(wrapper.data['user']);

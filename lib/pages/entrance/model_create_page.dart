@@ -214,7 +214,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                     });
                     // 检查图片是否合格
                     var detectResult = await CommonAPi.detect(result!);
-                    print(detectResult);
+                    // print(detectResult);
                     if (detectResult.isFrontal && detectResult.isQualified) {
                       setState(() => _isFrontValid = true);
                     } else {
@@ -464,7 +464,7 @@ class _ModelCreatePageState extends State<ModelCreatePage> {
                         });
                         // 对图片进行检测
                         var detectResult = await CommonAPi.detect(result!);
-                        print(detectResult);
+                        // print(detectResult);
                         if (detectResult.isQualified) {
                           setState(() => _isOtherValidMap[idx] = true);
                         } else {

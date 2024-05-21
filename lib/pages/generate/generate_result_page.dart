@@ -37,6 +37,12 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
 
   /// 处理任务结果
   void _process() async {
+    if (mounted) {
+      setState(() {
+        _urls.clear();
+        _isVideo = _task.isVideo ?? false;
+      });
+    }
     // 先对url进行处理
     if (_task.result!.contains(',')) {
       _urls.addAll(_task.result!.split(','));
@@ -46,27 +52,25 @@ class _GenerateResultPageState extends State<GenerateResultPage> {
     if (_urls.isEmpty) {
       return;
     }
-    // 长度大于1说明不是视频
-    if (_urls.length > 1) {
-      return;
-    }
-    if (mounted) {
-      setState(() {
-        _isVideo = false;
-      });
-    }
+    // // 长度大于1说明不是视频
+    // if (_urls.length > 1) {
+    //   setState(() {
+    //     _isVideo = false;
+    //   });
+    //   return;
+    // }
 
     // 请求文件检查是否是视频
-    var response = await Dio().get(_task.result!);
-    var mime = response.headers['content-type']?.first;
-    if (mime == null) {
-      return;
-    }
-    if (mime.startsWith('video')) {
-      setState(() {
-        _isVideo = true;
-      });
-    }
+    // var response = await Dio().get(_task.result!);
+    // var mime = response.headers['content-type']?.first;
+    // if (mime == null) {
+    //   return;
+    // }
+    // if (mime.startsWith('video')) {
+    //   setState(() {
+    //     _isVideo = true;
+    //   });
+    // }
   }
 
   @override

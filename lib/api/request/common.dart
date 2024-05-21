@@ -18,7 +18,7 @@ class CommonAPi {
         data: FormData.fromMap({
           "file": await MultipartFile.fromFile(path, filename: "image.jpg"),
         }));
-    print(response.data);
+    // print(response.data);
     if (response.statusCode != 200) {
       return null;
     } else {

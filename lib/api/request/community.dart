@@ -11,7 +11,7 @@ class CommunityApi {
 
     var response = await HttpUtil.get('$_prefix/post/list');
     var wrapper = Result.fromJson(response.data);
-    debugPrint(wrapper.data.toString());
+    // debugPrint(wrapper.data.toString());
     for (var item in wrapper.data) {
       list.add(CommunityVO.fromJson(item));
     }
